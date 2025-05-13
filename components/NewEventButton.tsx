@@ -39,7 +39,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     alignSelf: "center",
-    marginTop: 20
+    marginTop: 50,
+    marginBottom: 15
   },
   text: {
     color: "white",
