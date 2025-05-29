@@ -36,6 +36,13 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen
+          name="eventDetails"
+          options={{
+            title: "Event Details",
+            headerBackTitle: "Back"
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

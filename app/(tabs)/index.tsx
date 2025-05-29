@@ -13,25 +13,32 @@ import NewEventButton from "@/components/NewEventButton";
 import supabase from "@/supabaseClient";
 import fetchEvents from "../API/fetchEvents";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { router } from "expo-router";
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationProp
+} from "@react-navigation/native-stack";
+import { RootStackParamList, Event } from "../types";
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [participants, setParticipants] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  type Event = {
-    id: number;
-    title: string;
-    description: string;
-    date: string;
-    participants: string[];
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
+
+  const navigateToEvent = (event: Event) => {
+    // ✅ Using expo-router's router.push and passing event as a param
+    router.push({
+      pathname: "/eventDetails",
+      params: { event: JSON.stringify(event) } // Serialize if it's an object
+    });
   };
-
   useEffect(() => {
     const loadEvents = async () => {
       const data = await fetchEvents();
@@ -65,7 +72,6 @@ export default function HomeScreen() {
     setDescription("");
     setDate("");
     setParticipants("");
-    setSelectedDate(null);
   };
 
   const handleDelete = async (id: number) => {
@@ -79,9 +85,7 @@ export default function HomeScreen() {
 
       setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
       console.log("Delete");
-    } catch (error) {
-      console.error("Delete error:", error);
-    }
+    } catch (error) {}
   };
 
   return (
@@ -96,17 +100,24 @@ export default function HomeScreen() {
         />
         {events.length > 0 ? (
           events.map((event, index) => (
-            <View key={index} style={styles.eventCard}>
+            <TouchableOpacity
+              key={index}
+              style={styles.eventCard}
+              onPress={() => navigateToEvent(event)}
+            >
               <Text style={styles.title}>{event.title}</Text>
               <Text style={styles.description}>{event.description}</Text>
               <Text style={styles.date}>{event.date}</Text>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => handleDelete(event.id)}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleDelete(event.id);
+                }}
               >
                 <Text style={styles.buttonText}>Delete</Text>
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           ))
         ) : (
           <Text style={{ textAlign: "center", marginTop: 20 }}>No Events</Text>
@@ -131,13 +142,11 @@ export default function HomeScreen() {
             />
             <Text style={styles.label}>Date</Text>
             <TouchableOpacity
-              onPress={() => setShowDatePicker(true)}
               style={styles.input}
+              onPress={() => setShowDatePicker(true)}
             >
-              <Text style={{ color: selectedDate ? "#000" : "#999" }}>
-                {selectedDate
-                  ? selectedDate.toLocaleDateString()
-                  : "Select a date"}
+              <Text style={{ color: date ? "#000" : "#aaa" }}>
+                {date ? date : "Select a date"}
               </Text>
             </TouchableOpacity>
 
@@ -149,9 +158,9 @@ export default function HomeScreen() {
                 onChange={(event, selected) => {
                   setShowDatePicker(false);
                   if (selected) {
+                    const isoDate = selected.toISOString().split("T")[0];
+                    setDate(isoDate);
                     setSelectedDate(selected);
-                    const formattedDate = selected.toISOString().split("T")[0];
-                    setDate(formattedDate); // ✅ Save to DB-friendly string
                   }
                 }}
               />
@@ -172,27 +181,25 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 64
   },
+  input: {
+    borderWidth: 1,
+    borderColor: "#aaa",
+    padding: 12,
+    borderRadius: 6,
+    marginTop: 4,
+    backgroundColor: "#fff"
+  },
   form: {
-    width: "90%", // or try "100%" with padding if you want full screen
-    backgroundColor: "white", // optional: makes it look more like a modal
-    borderRadius: 10,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5
+    marginTop: 24,
+    margin: 10,
+    width: "90%",
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 15
   },
   label: {
     fontWeight: "bold",
     marginTop: 12
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#aaa",
-    padding: 8,
-    borderRadius: 6,
-    marginTop: 4
   },
   eventCard: {
     backgroundColor: "#f5f5f5",
