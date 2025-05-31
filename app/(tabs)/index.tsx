@@ -54,16 +54,23 @@ export default function HomeScreen() {
         .insert([
           {
             title,
-            description,
-            date
+            description
           }
-        ]);
-      if (userError) {
-        throw userError;
-      }
+        ])
+        .select();
 
-      const updatedEvents = await fetchEvents();
-      setEvents(updatedEvents);
+      if (userError) throw userError;
+
+      if (userData && userData.length > 0) {
+        const newEvent = userData[0]; // this will include the new event with its `id`
+        setEvents((prev) => [...prev, newEvent]); // optional: update local list
+
+        // ✅ Navigate with the full event (including id)
+        router.push({
+          pathname: "/eventDetails",
+          params: { event: JSON.stringify(newEvent) }
+        });
+      }
     } catch (error) {
       console.error("Error during insert:", error);
     }
@@ -140,31 +147,6 @@ export default function HomeScreen() {
               onChangeText={setDescription}
               placeholder="Event Description"
             />
-            <Text style={styles.label}>Date</Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={{ color: date ? "#000" : "#aaa" }}>
-                {date ? date : "Select a date"}
-              </Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={selectedDate || new Date()}
-                mode="date"
-                display="default"
-                onChange={(event, selected) => {
-                  setShowDatePicker(false);
-                  if (selected) {
-                    const isoDate = selected.toISOString().split("T")[0];
-                    setDate(isoDate);
-                    setSelectedDate(selected);
-                  }
-                }}
-              />
-            )}
             <View style={styles.buttonRow}>
               <Button title="Submit" onPress={handleSubmit} />
               <Button title="Close" onPress={() => setShowForm(false)} />
