@@ -4,7 +4,8 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  ScrollView
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { useState, useEffect } from "react";
@@ -19,6 +20,11 @@ export default function EventDetailsScreen() {
   );
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [expandedDate, setExpandedDate] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(null);
+  const [selectedTimes, setSelectedTimes] = useState<{
+    [date: string]: string[];
+  }>({});
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -57,6 +63,21 @@ export default function EventDetailsScreen() {
     return markedDates;
   };
 
+  const toggleTimeForDate = (date: string, time: string) => {
+    setSelectedTimes((prev) => {
+      const currentTimes = prev[date] || [];
+      const isSelected = currentTimes.includes(time);
+      const updatedTimes = isSelected
+        ? currentTimes.filter((t) => t !== time)
+        : [...currentTimes, time];
+
+      return {
+        ...prev,
+        [date]: updatedTimes
+      };
+    });
+  };
+
   const toggleDate = (day: { dateString: string }) => {
     const date = day.dateString;
     setSelectedDates((prev) => {
@@ -92,6 +113,25 @@ export default function EventDetailsScreen() {
     }
   };
 
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 15) {
+        const time = `${String(hour).padStart(2, "0")}:${String(
+          minute
+        ).padStart(2, "0")}`;
+        slots.push(time);
+      }
+    }
+    return slots;
+  };
+
+  const timeSlots = generateTimeSlots();
+
+  const handleSave = () => {
+    console.log("Saving selectedTimes:", selectedTimes);
+  };
+
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <Text style={{ fontSize: 20, fontWeight: "bold" }}>
@@ -121,25 +161,74 @@ export default function EventDetailsScreen() {
           </Pressable>
         </>
       ) : (
-        <View style={styles.dateContainer}>
-          {Object.keys(selectedDates).map((date, index) => {
-            const dateObj = new Date(date);
-            const monthName = dateObj.toLocaleString("default", {
-              month: "short"
-            }); // e.g., "Jun"
-            const day = dateObj.getDate(); // e.g., 4
-
-            return (
-              <TouchableOpacity key={index} style={styles.dateCard}>
-                <View style={styles.dateHeader}>
-                  <Text style={styles.headerText}>{monthName}</Text>
+        <View>
+          <View style={styles.dateContainer}>
+            {Object.keys(selectedDates).map((date, index) => {
+              const dateObj = new Date(date);
+              const monthName = dateObj.toLocaleString("default", {
+                month: "short"
+              }); // e.g., "Jun"
+              const day = dateObj.getDate(); // e.g., 4
+              const isExpanded = expandedDate === date;
+              return (
+                <View key={index} style={{ alignItems: "center" }}>
+                  {isExpanded && (
+                    <View style={styles.timePanel}>
+                      <ScrollView style={{ maxHeight: 200 }}>
+                        {timeSlots.map((slot, i) => {
+                          const isSelected =
+                            selectedTimes[date]?.includes(slot);
+                          return (
+                            <TouchableOpacity
+                              key={i}
+                              style={[
+                                styles.timeOption,
+                                isSelected && styles.timeOptionSelected
+                              ]}
+                              onPress={() => toggleTimeForDate(date, slot)}
+                            >
+                              <Text
+                                style={[
+                                  styles.timeOptionText,
+                                  isSelected && styles.timeOptionTextSelected
+                                ]}
+                              >
+                                {slot}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    style={styles.dateCard}
+                    onPress={() =>
+                      setExpandedDate((prev) => (prev === date ? null : date))
+                    }
+                  >
+                    <View style={styles.dateHeader}>
+                      <Text style={styles.headerText}>{monthName}</Text>
+                    </View>
+                    <View style={styles.dateContent}>
+                      <Text style={styles.contentText}>{day}</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.dateContent}>
-                  <Text style={styles.contentText}>{day}</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+              );
+            })}
+          </View>
+          <Pressable
+            onPress={handleSave}
+            style={({ hovered, pressed }) => [
+              styles.button,
+              hovered && styles.hover,
+              pressed && styles.pressed,
+              { marginTop: 10 }
+            ]}
+          >
+            <Text style={styles.text}>Save</Text>
+          </Pressable>
         </View>
       )}
     </View>
@@ -216,5 +305,34 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "#333"
+  },
+  timePanel: {
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 8,
+    marginBottom: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+    width: 100
+  },
+  timeOption: {
+    paddingVertical: 6,
+    alignItems: "center"
+  },
+  timeOptionText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1877F2"
+  },
+  timeOptionSelected: {
+    backgroundColor: "#1877F2",
+    borderRadius: 5
+  },
+  timeOptionTextSelected: {
+    color: "#fff",
+    fontWeight: "bold"
   }
 });
