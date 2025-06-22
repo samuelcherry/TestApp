@@ -25,6 +25,9 @@ export default function EventDetailsScreen() {
   const [selectedTimes, setSelectedTimes] = useState<{
     [date: string]: string[];
   }>({});
+  const [savedTimes, setSavedTimes] = useState<{
+    [date: string]: string[];
+  } | null>(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -33,7 +36,7 @@ export default function EventDetailsScreen() {
       setLoading(true);
       const { data, error } = await supabase
         .from("Events")
-        .select("dates, title, description")
+        .select("dates, title, description, times")
         .eq("id", parsedEvent.id)
         .single();
 
@@ -47,6 +50,7 @@ export default function EventDetailsScreen() {
           setSelectedDates({});
           setSubmitted(false);
         }
+        setSavedTimes(data.times || null);
       }
 
       setLoading(false);
@@ -94,6 +98,12 @@ export default function EventDetailsScreen() {
     });
   };
 
+  const formatSavedTimes = (times: { [date: string]: string[] }) => {
+    return Object.entries(times)
+      .map(([date, slots]) => `${date}: ${slots.join(", ")}`)
+      .join("\n");
+  };
+
   const handleSubmit = async (
     eventId: number,
     newDatesObject: { [key: string]: any }
@@ -128,8 +138,20 @@ export default function EventDetailsScreen() {
 
   const timeSlots = generateTimeSlots();
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("Events")
+        .update({ times: selectedTimes })
+        .eq("id", parsedEvent.id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error during insert:", error);
+    }
+
     console.log("Saving selectedTimes:", selectedTimes);
+    setExpandedDate(null);
   };
 
   return (
@@ -160,6 +182,14 @@ export default function EventDetailsScreen() {
             <Text style={styles.text}>Submit</Text>
           </Pressable>
         </>
+      ) : savedTimes && Object.keys(savedTimes).length > 0 ? (
+        // Saved times summary view
+        <View>
+          <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
+            Your selected times:
+          </Text>
+          <Text>{formatSavedTimes(savedTimes)}</Text>
+        </View>
       ) : (
         <View>
           <View style={styles.dateContainer}>
