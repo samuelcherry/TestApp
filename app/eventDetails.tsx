@@ -10,6 +10,7 @@ import {
 import { Calendar } from "react-native-calendars";
 import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
+import DateView from "@/components/DateView";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -193,77 +194,15 @@ export default function EventDetailsScreen() {
         </View>
       ) : (
         //DATE VIEW
-        <View>
-          <View style={styles.dateContainer}>
-            {Object.keys(selectedDates).map((date, index) => {
-              const [year, month, day] = date.split("-");
-              const monthName = new Date(`${year}-${month}-01`).toLocaleString(
-                "default",
-                {
-                  month: "short"
-                }
-              );
-              const isExpanded = expandedDate === date;
-              return (
-                <View key={index} style={{ alignItems: "center" }}>
-                  {isExpanded && (
-                    <View style={styles.timePanel}>
-                      <ScrollView style={{ maxHeight: 200 }}>
-                        {timeSlots.map((slot, i) => {
-                          const isSelected =
-                            selectedTimes[date]?.includes(slot);
-                          return (
-                            <TouchableOpacity
-                              key={i}
-                              style={[
-                                styles.timeOption,
-                                isSelected && styles.timeOptionSelected
-                              ]}
-                              onPress={() => toggleTimeForDate(date, slot)}
-                            >
-                              <Text
-                                style={[
-                                  styles.timeOptionText,
-                                  isSelected && styles.timeOptionTextSelected
-                                ]}
-                              >
-                                {slot}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </ScrollView>
-                    </View>
-                  )}
-                  <TouchableOpacity
-                    style={styles.dateCard}
-                    onPress={() =>
-                      setExpandedDate((prev) => (prev === date ? null : date))
-                    }
-                  >
-                    <View style={styles.dateHeader}>
-                      <Text style={styles.headerText}>{monthName}</Text>
-                    </View>
-                    <View style={styles.dateContent}>
-                      <Text style={styles.contentText}>{day}</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </View>
-          <Pressable
-            onPress={handleSave}
-            style={({ hovered, pressed }) => [
-              styles.button,
-              hovered && styles.hover,
-              pressed && styles.pressed,
-              { marginTop: 10 }
-            ]}
-          >
-            <Text style={styles.text}>Save</Text>
-          </Pressable>
-        </View>
+        <DateView
+          selectedDates={selectedDates}
+          selectedTimes={selectedTimes}
+          toggleTimeForDate={toggleTimeForDate}
+          timeSlots={timeSlots}
+          expandedDate={expandedDate}
+          setExpandedDate={setExpandedDate}
+          handleSave={handleSave}
+        />
       )}
     </View>
   );
