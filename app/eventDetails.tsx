@@ -109,7 +109,7 @@ export default function EventDetailsScreen() {
     newDatesObject: { [key: string]: any }
   ) => {
     try {
-      const newDatesArray = Object.keys(newDatesObject);
+      const newDatesArray = newDatesObject;
       const { data, error } = await supabase
         .from("Events")
         .update({ dates: newDatesArray })
@@ -163,6 +163,7 @@ export default function EventDetailsScreen() {
       <Text style={{ marginBottom: 20 }}>{parsedEvent?.date}</Text>
 
       {!submitted ? (
+        //CALENDAR VIEW
         <>
           <Calendar
             onDayPress={toggleDate}
@@ -182,8 +183,8 @@ export default function EventDetailsScreen() {
             <Text style={styles.text}>Submit</Text>
           </Pressable>
         </>
-      ) : savedTimes && Object.keys(savedTimes).length > 0 ? (
-        // Saved times summary view
+      ) : //SAVED TIMES
+      savedTimes && Object.keys(savedTimes).length > 0 ? (
         <View>
           <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
             Your selected times:
@@ -191,14 +192,17 @@ export default function EventDetailsScreen() {
           <Text>{formatSavedTimes(savedTimes)}</Text>
         </View>
       ) : (
+        //DATE VIEW
         <View>
           <View style={styles.dateContainer}>
             {Object.keys(selectedDates).map((date, index) => {
-              const dateObj = new Date(date);
-              const monthName = dateObj.toLocaleString("default", {
-                month: "short"
-              }); // e.g., "Jun"
-              const day = dateObj.getDate(); // e.g., 4
+              const [year, month, day] = date.split("-");
+              const monthName = new Date(`${year}-${month}-01`).toLocaleString(
+                "default",
+                {
+                  month: "short"
+                }
+              );
               const isExpanded = expandedDate === date;
               return (
                 <View key={index} style={{ alignItems: "center" }}>
