@@ -22,13 +22,14 @@ export default function EventDetailsScreen() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
-  const [isExpanded, setIsExpanded] = useState(null);
   const [selectedTimes, setSelectedTimes] = useState<{
     [date: string]: string[];
   }>({});
   const [savedTimes, setSavedTimes] = useState<{
     [date: string]: string[];
   } | null>(null);
+  const [editingTimes, setEditingTimes] = useState(false);
+  const [editEvent, setEditEvent] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -141,30 +142,72 @@ export default function EventDetailsScreen() {
 
   const handleSave = async () => {
     try {
+      const selectedDateKeys = Object.keys(selectedDates);
+      const filteredTimes: { [key: string]: string[] } = {};
+      selectedDateKeys.forEach((date) => {
+        if (selectedTimes[date]) {
+          filteredTimes[date] = selectedTimes[date];
+        }
+      });
+
       const { data, error } = await supabase
         .from("Events")
-        .update({ times: selectedTimes })
+        .update({
+          dates: selectedDateKeys,
+          times: filteredTimes
+        })
         .eq("id", parsedEvent.id);
 
       if (error) throw error;
+
+      setSavedTimes(filteredTimes);
+      setSelectedTimes(filteredTimes);
+      setSubmitted(true);
+      setEditingTimes(false);
+      setExpandedDate(null);
     } catch (error) {
       console.error("Error during insert:", error);
     }
 
     console.log("Saving selectedTimes:", selectedTimes);
     setExpandedDate(null);
+    setEditingTimes(false);
+  };
+
+  const handleEdit = async () => {
+    setSubmitted(false);
+  };
+
+  const handleEditEvent = async () => {
+    setEditEvent(true);
+    console.log("Edit event");
   };
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-        {parsedEvent?.title}
-      </Text>
-      <Text style={{ marginVertical: 10 }}>{parsedEvent?.description}</Text>
-      <Text style={{ marginBottom: 20 }}>{parsedEvent?.date}</Text>
-
+      {editEvent ? (
+        <View>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+            {parsedEvent?.title}
+          </Text>
+          <Text style={{ marginVertical: 10 }}>{parsedEvent?.description}</Text>
+          <Text style={{ marginBottom: 20 }}>{parsedEvent?.date}</Text>
+          <Pressable
+            onPress={handleEditEvent}
+            style={({ hovered }) => [
+              styles.button,
+              hovered && styles.hover,
+              pressed && styles.pressed
+            ]}
+          >
+            <Text style={styles.text}>Edit Event</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Text style={{ marginVertical: 10 }}>{parsedEvent?.description}</Text>
+      )}
       {!submitted ? (
-        //CALENDAR VIEW
+        // CALENDAR VIEW
         <>
           <Calendar
             onDayPress={toggleDate}
@@ -184,16 +227,8 @@ export default function EventDetailsScreen() {
             <Text style={styles.text}>Submit</Text>
           </Pressable>
         </>
-      ) : //SAVED TIMES
-      savedTimes && Object.keys(savedTimes).length > 0 ? (
-        <View>
-          <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
-            Your selected times:
-          </Text>
-          <Text>{formatSavedTimes(savedTimes)}</Text>
-        </View>
-      ) : (
-        //DATE VIEW
+      ) : editingTimes ? (
+        // DATE VIEW (edit times)
         <DateView
           selectedDates={selectedDates}
           selectedTimes={selectedTimes}
@@ -202,7 +237,53 @@ export default function EventDetailsScreen() {
           expandedDate={expandedDate}
           setExpandedDate={setExpandedDate}
           handleSave={handleSave}
+          handleEdit={handleEdit}
         />
+      ) : (
+        // SAVED TIMES
+        <View>
+          <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
+            Your selected times:
+          </Text>
+          <ScrollView style={{ maxHeight: 300 }}>
+            {savedTimes &&
+              Object.entries(savedTimes).map(([date, times]) => (
+                <View key={date} style={{ marginBottom: 20 }}>
+                  <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
+                    {date}
+                  </Text>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                    {times.map((time) => (
+                      <Pressable
+                        key={time}
+                        style={{
+                          backgroundColor: "#1877F2",
+                          borderRadius: 6,
+                          paddingHorizontal: 12,
+                          paddingVertical: 6,
+                          margin: 4
+                        }}
+                      >
+                        <Text style={{ color: "white", fontWeight: "600" }}>
+                          {time}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              ))}
+          </ScrollView>
+          <Pressable
+            onPress={() => setEditingTimes(true)} // 👈 enable times editing
+            style={({ hovered }) => [
+              styles.button,
+              hovered && styles.hover,
+              pressed && styles.pressed
+            ]}
+          >
+            <Text style={styles.text}>Edit Times</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );

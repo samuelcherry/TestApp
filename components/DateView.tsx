@@ -17,6 +17,7 @@ interface DateViewProps {
   expandedDate: string | null;
   setExpandedDate: React.Dispatch<React.SetStateAction<string | null>>;
   handleSave: () => void;
+  handleEdit: () => void;
 }
 
 export default function DateView({
@@ -26,7 +27,8 @@ export default function DateView({
   timeSlots,
   expandedDate,
   setExpandedDate,
-  handleSave
+  handleSave,
+  handleEdit
 }: DateViewProps) {
   return (
     <View>
@@ -89,22 +91,39 @@ export default function DateView({
           );
         })}
       </View>
-      <Pressable
-        onPress={handleSave}
-        style={({ hovered, pressed }) => [
-          styles.button,
-          hovered && styles.hover,
-          pressed && styles.pressed,
-          { marginTop: 10 }
-        ]}
-      >
-        <Text style={styles.text}>Save</Text>
-      </Pressable>
+      <View style={styles.buttonContainer}>
+        <Pressable
+          onPress={handleEdit}
+          style={({ hovered, pressed }) => [
+            styles.button,
+            hovered && styles.hover,
+            pressed && styles.pressed
+          ]}
+        >
+          <Text style={styles.text}>Edit</Text>
+        </Pressable>
+        <Pressable
+          onPress={handleSave}
+          style={({ hovered, pressed }) => [
+            styles.button,
+            hovered && styles.hover,
+            pressed && styles.pressed
+          ]}
+        >
+          <Text style={styles.text}>Save</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignContent: "center"
+  },
   button: {
     backgroundColor: "#1877F2",
     paddingVertical: 12,
@@ -116,7 +135,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     alignSelf: "center",
     marginTop: 50,
-    marginBottom: 15
+    marginBottom: 15,
+    marginLeft: 15,
+    alignContent: "center"
   },
   text: {
     color: "white",
