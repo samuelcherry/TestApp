@@ -12,13 +12,10 @@ import React, { useEffect, useState } from "react";
 import NewEventButton from "@/components/NewEventButton";
 import supabase from "@/supabaseClient";
 import fetchEvents from "../API/fetchEvents";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
-import {
-  createNativeStackNavigator,
-  NativeStackNavigationProp
-} from "@react-navigation/native-stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList, Event } from "../types";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
@@ -27,10 +24,7 @@ export default function HomeScreen() {
   const [date, setDate] = useState("");
   const [participants, setParticipants] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
+  const isFocused = useIsFocused();
 
   const navigateToEvent = (event: Event) => {
     // ✅ Using expo-router's router.push and passing event as a param
@@ -40,12 +34,14 @@ export default function HomeScreen() {
     });
   };
   useEffect(() => {
-    const loadEvents = async () => {
-      const data = await fetchEvents();
-      setEvents(data);
-    };
-    loadEvents();
-  }, []);
+    if (isFocused) {
+      const loadEvents = async () => {
+        const data = await fetchEvents();
+        setEvents(data);
+      };
+      loadEvents();
+    }
+  }, [isFocused]);
 
   const handleSubmit = async () => {
     try {

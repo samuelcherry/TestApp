@@ -5,12 +5,14 @@ import {
   Pressable,
   StyleSheet,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  TextInput
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
 import DateView from "@/components/DateView";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -31,33 +33,36 @@ export default function EventDetailsScreen() {
   const [editingTimes, setEditingTimes] = useState(false);
   const [editEvent, setEditEvent] = useState(false);
 
-  useEffect(() => {
-    const fetchEvent = async () => {
-      if (!parsedEvent?.id) return;
+  const fetchEvent = async () => {
+    if (!parsedEvent?.id) return;
 
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("Events")
-        .select("dates, title, description, times")
-        .eq("id", parsedEvent.id)
-        .single();
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("Events")
+      .select("dates, title, description, times")
+      .eq("id", parsedEvent.id)
+      .single();
 
-      if (error) {
-        console.error("Error fetching event:", error);
+    if (error) {
+      console.error("Error fetching event:", error);
+    } else {
+      if (data.dates && data.dates.length > 0) {
+        setSelectedDates(convertArrayToMarkedDates(data.dates));
+        setSubmitted(true);
       } else {
-        if (data.dates && data.dates.length > 0) {
-          setSelectedDates(convertArrayToMarkedDates(data.dates));
-          setSubmitted(true);
-        } else {
-          setSelectedDates({});
-          setSubmitted(false);
-        }
-        setSavedTimes(data.times || null);
+        setSelectedDates({});
+        setSubmitted(false);
       }
+      setSavedTimes(data.times || null);
 
-      setLoading(false);
-    };
+      setTitle(data.title || "");
+      setDescription(data.description || "");
+    }
 
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchEvent();
   }, [parsedEvent?.id]);
 
@@ -128,7 +133,7 @@ export default function EventDetailsScreen() {
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
+      for (let minute = 0; minute < 60; minute += 30) {
         const time = `${String(hour).padStart(2, "0")}:${String(
           minute
         ).padStart(2, "0")}`;
@@ -183,15 +188,39 @@ export default function EventDetailsScreen() {
     console.log("Edit event");
   };
 
+  const [title, setTitle] = useState(parsedEvent?.title || "");
+  const [description, setDescription] = useState(
+    parsedEvent?.description || ""
+  );
+
+  const handleEditSave = async () => {
+    try {
+      const { data: userData, error: userError } = await supabase
+        .from("Events")
+        .update([
+          {
+            title,
+            description
+          }
+        ])
+        .eq("id", parsedEvent.id);
+
+      if (userError) throw userError;
+
+      await fetchEvent();
+      console.log("event edited");
+    } catch (error) {
+      console.error("Error during updating:", error);
+    }
+    setEditEvent(false);
+  };
+
   return (
     <View style={{ flex: 1, padding: 20 }}>
-      {editEvent ? (
+      {!editEvent ? (
         <View>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-            {parsedEvent?.title}
-          </Text>
-          <Text style={{ marginVertical: 10 }}>{parsedEvent?.description}</Text>
-          <Text style={{ marginBottom: 20 }}>{parsedEvent?.date}</Text>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
+          <Text style={{ marginVertical: 10 }}>{description}</Text>
           <Pressable
             onPress={handleEditEvent}
             style={({ hovered }) => [
@@ -200,11 +229,35 @@ export default function EventDetailsScreen() {
               pressed && styles.pressed
             ]}
           >
-            <Text style={styles.text}>Edit Event</Text>
+            <Icon name="edit" size={24} color="#fff" />
           </Pressable>
         </View>
       ) : (
-        <Text style={{ marginVertical: 10 }}>{parsedEvent?.description}</Text>
+        <View>
+          <TextInput
+            style={{ fontSize: 20, fontWeight: "bold", borderBottomWidth: 1 }}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Title"
+          />
+          <TextInput
+            style={{ marginVertical: 10, borderBottomWidth: 1 }}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Description"
+            multiline
+          />
+          <Pressable
+            onPress={handleEditSave}
+            style={({ hovered }) => [
+              styles.button,
+              hovered && styles.hover,
+              pressed && styles.pressed
+            ]}
+          >
+            <Text style={styles.text}>Save</Text>
+          </Pressable>
+        </View>
       )}
       {!submitted ? (
         // CALENDAR VIEW
@@ -285,6 +338,9 @@ export default function EventDetailsScreen() {
           </Pressable>
         </View>
       )}
+      <View>
+        <Text>Participants</Text>
+      </View>
     </View>
   );
 }
