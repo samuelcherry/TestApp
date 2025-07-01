@@ -8,6 +8,7 @@ import {
   ScrollView
 } from "react-native";
 import React from "react";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 interface DateViewProps {
   selectedDates: { [key: string]: any };
@@ -95,22 +96,22 @@ export default function DateView({
         <Pressable
           onPress={handleEdit}
           style={({ hovered, pressed }) => [
-            styles.button,
+            styles.editButton,
             hovered && styles.hover,
             pressed && styles.pressed
           ]}
         >
-          <Text style={styles.text}>Edit</Text>
+          <Icon name="edit" size={24} color="#fff" />
         </Pressable>
         <Pressable
           onPress={handleSave}
           style={({ hovered, pressed }) => [
-            styles.button,
+            styles.editButton,
             hovered && styles.hover,
             pressed && styles.pressed
           ]}
         >
-          <Text style={styles.text}>Save</Text>
+          <Icon name="save" size={24} color="#fff" />
         </Pressable>
       </View>
     </View>
@@ -123,6 +124,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignContent: "center"
+  },
+  editButton: {
+    backgroundColor: "#1877F2",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    alignSelf: "center",
+    marginTop: 50,
+    marginBottom: 15,
+    margin: 15
   },
   button: {
     backgroundColor: "#1877F2",

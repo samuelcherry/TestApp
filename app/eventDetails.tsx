@@ -4,7 +4,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
   TextInput
 } from "react-native";
@@ -13,6 +12,7 @@ import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
 import DateView from "@/components/DateView";
 import Icon from "react-native-vector-icons/FontAwesome";
+import Participants from "@/components/Participants";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -32,6 +32,10 @@ export default function EventDetailsScreen() {
   } | null>(null);
   const [editingTimes, setEditingTimes] = useState(false);
   const [editEvent, setEditEvent] = useState(false);
+  const [title, setTitle] = useState(parsedEvent?.title || "");
+  const [description, setDescription] = useState(
+    parsedEvent?.description || ""
+  );
 
   const fetchEvent = async () => {
     if (!parsedEvent?.id) return;
@@ -105,11 +109,11 @@ export default function EventDetailsScreen() {
     });
   };
 
-  const formatSavedTimes = (times: { [date: string]: string[] }) => {
-    return Object.entries(times)
-      .map(([date, slots]) => `${date}: ${slots.join(", ")}`)
-      .join("\n");
-  };
+  // const formatSavedTimes = (times: { [date: string]: string[] }) => {
+  //   return Object.entries(times)
+  //     .map(([date, slots]) => `${date}: ${slots.join(", ")}`)
+  //     .join("\n");
+  // };
 
   const handleSubmit = async (
     eventId: number,
@@ -188,11 +192,6 @@ export default function EventDetailsScreen() {
     console.log("Edit event");
   };
 
-  const [title, setTitle] = useState(parsedEvent?.title || "");
-  const [description, setDescription] = useState(
-    parsedEvent?.description || ""
-  );
-
   const handleEditSave = async () => {
     try {
       const { data: userData, error: userError } = await supabase
@@ -218,15 +217,24 @@ export default function EventDetailsScreen() {
   return (
     <View style={{ flex: 1, padding: 20 }}>
       {!editEvent ? (
-        <View>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
-          <Text style={{ marginVertical: 10 }}>{description}</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}
+        >
+          <View>
+            <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
+            <Text style={{ marginVertical: 10 }}>{description}</Text>
+          </View>
           <Pressable
             onPress={handleEditEvent}
-            style={({ hovered }) => [
-              styles.button,
+            style={({ hovered, pressed }) => [
+              styles.editButton,
               hovered && styles.hover,
-              pressed && styles.pressed
+              pressed && styles.pressed,
+              { alignSelf: "flex-start", marginTop: 2 }
             ]}
           >
             <Icon name="edit" size={24} color="#fff" />
@@ -255,7 +263,7 @@ export default function EventDetailsScreen() {
               pressed && styles.pressed
             ]}
           >
-            <Text style={styles.text}>Save</Text>
+            <Icon name="save" size={20} color="#fff" />
           </Pressable>
         </View>
       )}
@@ -272,12 +280,12 @@ export default function EventDetailsScreen() {
               handleSubmit(parsedEvent.id, Object.keys(selectedDates))
             }
             style={({ hovered }) => [
-              styles.button,
+              styles.editButton,
               hovered && styles.hover,
               pressed && styles.pressed
             ]}
           >
-            <Text style={styles.text}>Submit</Text>
+            <Icon name="save" size={24} color="#fff" />
           </Pressable>
         </>
       ) : editingTimes ? (
@@ -295,6 +303,14 @@ export default function EventDetailsScreen() {
       ) : (
         // SAVED TIMES
         <View>
+          <View
+            style={{
+              borderBottomColor: "gray", // Line color
+              borderBottomWidth: StyleSheet.hairlineWidth, // Thin line
+              marginTop: 16,
+              marginBottom: 16
+            }}
+          />
           <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
             Your selected times:
           </Text>
@@ -327,18 +343,26 @@ export default function EventDetailsScreen() {
               ))}
           </ScrollView>
           <Pressable
-            onPress={() => setEditingTimes(true)} // 👈 enable times editing
+            onPress={() => setEditingTimes(true)}
             style={({ hovered }) => [
-              styles.button,
+              styles.editButton,
               hovered && styles.hover,
               pressed && styles.pressed
             ]}
           >
-            <Text style={styles.text}>Edit Times</Text>
+            <Icon name="edit" size={24} color="#fff" />
           </Pressable>
         </View>
       )}
       <View>
+        <View
+          style={{
+            borderBottomColor: "gray", // Line color
+            borderBottomWidth: StyleSheet.hairlineWidth, // Thin line
+            marginTop: 16,
+            marginBottom: 16
+          }}
+        />
         <Text>Participants</Text>
       </View>
     </View>
@@ -358,6 +382,24 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 50,
     marginBottom: 15
+  },
+  editButton: {
+    backgroundColor: "#1877F2",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    alignSelf: "center",
+    marginTop: 50,
+    marginBottom: 15
+  },
+  horizontalLine: {
+    borderBottomColor: "#ccc",
+    borderBottomWidth: 1,
+    marginVertical: 10
   },
   text: {
     color: "white",

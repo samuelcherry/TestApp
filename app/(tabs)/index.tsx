@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList, Event } from "../types";
 import { useIsFocused } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
@@ -27,10 +28,9 @@ export default function HomeScreen() {
   const isFocused = useIsFocused();
 
   const navigateToEvent = (event: Event) => {
-    // ✅ Using expo-router's router.push and passing event as a param
     router.push({
       pathname: "/eventDetails",
-      params: { event: JSON.stringify(event) } // Serialize if it's an object
+      params: { event: JSON.stringify(event) }
     });
   };
   useEffect(() => {
@@ -58,10 +58,8 @@ export default function HomeScreen() {
       if (userError) throw userError;
 
       if (userData && userData.length > 0) {
-        const newEvent = userData[0]; // this will include the new event with its `id`
-        setEvents((prev) => [...prev, newEvent]); // optional: update local list
-
-        // ✅ Navigate with the full event (including id)
+        const newEvent = userData[0];
+        setEvents((prev) => [...prev, newEvent]);
         router.push({
           pathname: "/eventDetails",
           params: { event: JSON.stringify(newEvent) }
@@ -118,7 +116,7 @@ export default function HomeScreen() {
                   handleDelete(event.id);
                 }}
               >
-                <Text style={styles.buttonText}>Delete</Text>
+                <Icon name="trash" size={24} color="#fff" />
               </TouchableOpacity>
             </TouchableOpacity>
           ))
@@ -218,6 +216,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     alignSelf: "center",
     marginTop: 50
+  },
+  deleteButton: {
+    backgroundColor: "#1877F2",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    alignSelf: "center",
+    marginTop: 50,
+    marginBottom: 15
   },
 
   buttonText: {
