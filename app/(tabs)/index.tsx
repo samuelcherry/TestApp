@@ -17,6 +17,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList, Event } from "../types";
 import { useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { Session } from "@supabase/supabase-js";
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
@@ -42,6 +43,30 @@ export default function HomeScreen() {
       loadEvents();
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      const session: Session | null = data.session;
+
+      if (!session) {
+        router.replace("/AuthScreen");
+      }
+    };
+
+    checkAuth();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) {
+          router.replace("/AuthScreen");
+        }
+      }
+    );
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSubmit = async () => {
     try {
