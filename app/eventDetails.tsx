@@ -290,16 +290,19 @@ export default function EventDetailsScreen() {
         </>
       ) : editingTimes ? (
         // DATE VIEW (edit times)
-        <DateView
-          selectedDates={selectedDates}
-          selectedTimes={selectedTimes}
-          toggleTimeForDate={toggleTimeForDate}
-          timeSlots={timeSlots}
-          expandedDate={expandedDate}
-          setExpandedDate={setExpandedDate}
-          handleSave={handleSave}
-          handleEdit={handleEdit}
-        />
+        <View>
+          <Text>TEST</Text>
+          <DateView
+            selectedDates={selectedDates}
+            selectedTimes={selectedTimes}
+            toggleTimeForDate={toggleTimeForDate}
+            timeSlots={timeSlots}
+            expandedDate={expandedDate}
+            setExpandedDate={setExpandedDate}
+            handleSave={handleSave}
+            handleEdit={handleEdit}
+          />
+        </View>
       ) : (
         // SAVED TIMES
         <View>

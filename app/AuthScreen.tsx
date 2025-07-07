@@ -8,6 +8,7 @@ import {
   Alert
 } from "react-native";
 import supabase from "@/supabaseClient";
+import { router } from "expo-router";
 
 export default function AuthScreen() {
   const [email, setEmail] = useState("");
@@ -64,6 +65,7 @@ export default function AuthScreen() {
       Alert.alert("Login error", error.message);
     } else {
       Alert.alert("Logged in!");
+      router.replace("/(tabs)/" as const);
     }
   };
 
