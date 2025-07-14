@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import supabase from "@/supabaseClient";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AuthScreen() {
   const [email, setEmail] = useState("");
@@ -56,17 +57,42 @@ export default function AuthScreen() {
     }
   };
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
 
     if (error) {
       Alert.alert("Login error", error.message);
-    } else {
-      Alert.alert("Logged in!");
-      router.replace("/(tabs)/" as const);
+      return;
     }
+
+    const user = data.user;
+
+    if (!user) {
+      Alert.alert("Login failed: No user found.");
+      return;
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("Profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError) {
+      Alert.alert("Profile fetch error", profileError.message);
+      return;
+    }
+
+    console.log("User UUID:", user.id);
+    console.log("Profile info:", profile);
+
+    await AsyncStorage.setItem("uuid", user.id);
+    await AsyncStorage.setItem("username", profile.username);
+
+    Alert.alert("Logged in!");
+    router.replace("/(tabs)/" as const);
   };
 
   return (

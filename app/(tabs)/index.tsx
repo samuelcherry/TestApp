@@ -11,13 +11,13 @@ import {
 import React, { useEffect, useState } from "react";
 import NewEventButton from "@/components/NewEventButton";
 import supabase from "@/supabaseClient";
-import fetchEvents from "../API/fetchEvents";
+import { fetchEvents } from "../API/fetchEvents";
 import { router } from "expo-router";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList, Event } from "../types";
+import { Event } from "../types";
 import { useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Session } from "@supabase/supabase-js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
@@ -27,17 +27,26 @@ export default function HomeScreen() {
   const [participants, setParticipants] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
   const isFocused = useIsFocused();
+  const [uuid, setUuid] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
-  const navigateToEvent = (event: Event) => {
-    router.push({
-      pathname: "/eventDetails",
-      params: { event: JSON.stringify(event) }
-    });
-  };
+  useEffect(() => {
+    const loadUserData = async () => {
+      const uuid = await AsyncStorage.getItem("uuid");
+      const username = await AsyncStorage.getItem("username");
+
+      setUuid(uuid);
+      setUsername(username);
+    };
+
+    loadUserData();
+  }, []);
+
   useEffect(() => {
     if (isFocused) {
       const loadEvents = async () => {
-        const data = await fetchEvents();
+        const uuid = await AsyncStorage.getItem("uuid");
+        const data = await fetchEvents(uuid);
         setEvents(data);
       };
       loadEvents();
@@ -68,6 +77,13 @@ export default function HomeScreen() {
     };
   }, []);
 
+  const navigateToEvent = (event: Event) => {
+    router.push({
+      pathname: "/eventDetails",
+      params: { event: JSON.stringify(event) }
+    });
+  };
+
   const handleSubmit = async () => {
     try {
       const { data: userData, error: userError } = await supabase
@@ -75,7 +91,8 @@ export default function HomeScreen() {
         .insert([
           {
             title,
-            description
+            description,
+            ownerId: uuid
           }
         ])
         .select();
