@@ -5,14 +5,18 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
-  TextInput
+  TextInput,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
+  Keyboard
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
 import DateView from "@/components/DateView";
 import Icon from "react-native-vector-icons/FontAwesome";
-import Participants from "@/components/Participants";
+import { Participants } from "@/components/Participants";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -108,12 +112,6 @@ export default function EventDetailsScreen() {
       return updated;
     });
   };
-
-  // const formatSavedTimes = (times: { [date: string]: string[] }) => {
-  //   return Object.entries(times)
-  //     .map(([date, slots]) => `${date}: ${slots.join(", ")}`)
-  //     .join("\n");
-  // };
 
   const handleSubmit = async (
     eventId: number,
@@ -215,160 +213,165 @@ export default function EventDetailsScreen() {
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      {!editEvent ? (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
-          <View>
-            <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
-            <Text style={{ marginVertical: 10 }}>{description}</Text>
-          </View>
-          <Pressable
-            onPress={handleEditEvent}
-            style={({ hovered, pressed }) => [
-              styles.editButton,
-              hovered && styles.hover,
-              pressed && styles.pressed,
-              { alignSelf: "flex-start", marginTop: 2 }
-            ]}
-          >
-            <Icon name="edit" size={24} color="#fff" />
-          </Pressable>
-        </View>
-      ) : (
-        <View>
-          <TextInput
-            style={{ fontSize: 20, fontWeight: "bold", borderBottomWidth: 1 }}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Title"
-          />
-          <TextInput
-            style={{ marginVertical: 10, borderBottomWidth: 1 }}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Description"
-            multiline
-          />
-          <Pressable
-            onPress={handleEditSave}
-            style={({ hovered }) => [
-              styles.button,
-              hovered && styles.hover,
-              pressed && styles.pressed
-            ]}
-          >
-            <Icon name="save" size={20} color="#fff" />
-          </Pressable>
-        </View>
-      )}
-      {!submitted ? (
-        // CALENDAR VIEW
-        <>
-          <Calendar
-            onDayPress={toggleDate}
-            markedDates={selectedDates}
-            markingType={"multi-dot"}
-          />
-          <Pressable
-            onPress={() =>
-              handleSubmit(parsedEvent.id, Object.keys(selectedDates))
-            }
-            style={({ hovered }) => [
-              styles.editButton,
-              hovered && styles.hover,
-              pressed && styles.pressed
-            ]}
-          >
-            <Icon name="save" size={24} color="#fff" />
-          </Pressable>
-        </>
-      ) : editingTimes ? (
-        // DATE VIEW (edit times)
-        <View>
-          <Text>TEST</Text>
-          <DateView
-            selectedDates={selectedDates}
-            selectedTimes={selectedTimes}
-            toggleTimeForDate={toggleTimeForDate}
-            timeSlots={timeSlots}
-            expandedDate={expandedDate}
-            setExpandedDate={setExpandedDate}
-            handleSave={handleSave}
-            handleEdit={handleEdit}
-          />
-        </View>
-      ) : (
-        // SAVED TIMES
-        <View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {!editEvent ? (
           <View
             style={{
-              borderBottomColor: "gray", // Line color
-              borderBottomWidth: StyleSheet.hairlineWidth, // Thin line
-              marginTop: 16,
-              marginBottom: 16
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center"
             }}
-          />
-          <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
-            Your selected times:
-          </Text>
-          <ScrollView style={{ maxHeight: 300 }}>
-            {savedTimes &&
-              Object.entries(savedTimes).map(([date, times]) => (
-                <View key={date} style={{ marginBottom: 20 }}>
-                  <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
-                    {date}
-                  </Text>
-                  <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                    {times.map((time) => (
-                      <Pressable
-                        key={time}
-                        style={{
-                          backgroundColor: "#1877F2",
-                          borderRadius: 6,
-                          paddingHorizontal: 12,
-                          paddingVertical: 6,
-                          margin: 4
-                        }}
-                      >
-                        <Text style={{ color: "white", fontWeight: "600" }}>
-                          {time}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                </View>
-              ))}
-          </ScrollView>
-          <Pressable
-            onPress={() => setEditingTimes(true)}
-            style={({ hovered }) => [
-              styles.editButton,
-              hovered && styles.hover,
-              pressed && styles.pressed
-            ]}
           >
-            <Icon name="edit" size={24} color="#fff" />
-          </Pressable>
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
+              <Text style={{ marginVertical: 10 }}>{description}</Text>
+            </View>
+            <Pressable
+              onPress={handleEditEvent}
+              style={({ hovered, pressed }) => [
+                styles.editButton,
+                hovered && styles.hover,
+                pressed && styles.pressed,
+                { alignSelf: "flex-start", marginTop: 2 }
+              ]}
+            >
+              <Icon name="edit" size={24} color="#fff" />
+            </Pressable>
+          </View>
+        ) : (
+          <View>
+            <TextInput
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                borderBottomWidth: 1
+              }}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Title"
+            />
+            <TextInput
+              style={{ marginVertical: 10, borderBottomWidth: 1 }}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Description"
+              multiline
+            />
+            <Pressable
+              onPress={handleEditSave}
+              style={({ hovered }) => [
+                styles.button,
+                hovered && styles.hover,
+                pressed && styles.pressed
+              ]}
+            >
+              <Icon name="save" size={20} color="#fff" />
+            </Pressable>
+          </View>
+        )}
+        {!submitted ? (
+          // CALENDAR VIEW
+          <>
+            <Calendar
+              onDayPress={toggleDate}
+              markedDates={selectedDates}
+              markingType={"multi-dot"}
+            />
+            <Pressable
+              onPress={() =>
+                handleSubmit(parsedEvent.id, Object.keys(selectedDates))
+              }
+              style={({ hovered }) => [
+                styles.editButton,
+                hovered && styles.hover,
+                pressed && styles.pressed
+              ]}
+            >
+              <Icon name="save" size={24} color="#fff" />
+            </Pressable>
+          </>
+        ) : editingTimes ? (
+          // DATE VIEW (edit times)
+          <View>
+            <Text>TEST</Text>
+            <DateView
+              selectedDates={selectedDates}
+              selectedTimes={selectedTimes}
+              toggleTimeForDate={toggleTimeForDate}
+              timeSlots={timeSlots}
+              expandedDate={expandedDate}
+              setExpandedDate={setExpandedDate}
+              handleSave={handleSave}
+              handleEdit={handleEdit}
+            />
+          </View>
+        ) : (
+          // SAVED TIMES
+          <View>
+            <View
+              style={{
+                borderBottomColor: "gray", // Line color
+                borderBottomWidth: StyleSheet.hairlineWidth, // Thin line
+                marginTop: 16,
+                marginBottom: 16
+              }}
+            />
+            <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
+              Your selected times:
+            </Text>
+            <ScrollView style={{ maxHeight: 300 }}>
+              {savedTimes &&
+                Object.entries(savedTimes).map(([date, times]) => (
+                  <View key={date} style={{ marginBottom: 20 }}>
+                    <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
+                      {date}
+                    </Text>
+                    <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                      {times.map((time) => (
+                        <Pressable
+                          key={time}
+                          style={{
+                            backgroundColor: "#1877F2",
+                            borderRadius: 6,
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            margin: 4
+                          }}
+                        >
+                          <Text style={{ color: "white", fontWeight: "600" }}>
+                            {time}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                ))}
+            </ScrollView>
+            <Pressable
+              onPress={() => setEditingTimes(true)}
+              style={({ hovered }) => [
+                styles.editButton,
+                hovered && styles.hover,
+                pressed && styles.pressed
+              ]}
+            >
+              <Icon name="edit" size={24} color="#fff" />
+            </Pressable>
+          </View>
+        )}
+        <View>
+          <Participants />
         </View>
-      )}
-      <View>
-        <View
-          style={{
-            borderBottomColor: "gray", // Line color
-            borderBottomWidth: StyleSheet.hairlineWidth, // Thin line
-            marginTop: 16,
-            marginBottom: 16
-          }}
-        />
-        <Text>Participants</Text>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

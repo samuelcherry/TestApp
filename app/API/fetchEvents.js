@@ -1,10 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import supabase from "../../supabaseClient";
 
-export const fetchEvents = async () => {
-  const uuid = await AsyncStorage.getItem("uuid");
-  if (!uuid) return [];
-
+export const fetchEvents = async (uuid) => {
   const { data: data, error } = await supabase
     .from("Events")
     .select("*")

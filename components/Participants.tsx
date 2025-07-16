@@ -1,16 +1,9 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  TextInput
-} from "react-native";
+import { View, Text, StyleSheet, TextInput } from "react-native";
 
-const Participants = () => {
+export const Participants = () => {
   return (
-    <div>
+    <View>
       {" "}
       <View
         style={{
@@ -21,8 +14,18 @@ const Participants = () => {
         }}
       />
       <Text>Participants</Text>
-    </div>
+      <TextInput style={styles.input} placeholder="participants" />
+    </View>
   );
 };
 
-export default Participants;
+const styles = StyleSheet.create({
+  input: {
+    borderWidth: 1,
+    borderColor: "#aaa",
+    padding: 12,
+    borderRadius: 6,
+    marginTop: 4,
+    backgroundColor: "#fff"
+  }
+});
