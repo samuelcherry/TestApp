@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { Event } from "../types";
 import { useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { FontAwesome } from "@expo/vector-icons";
 import { Session } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -29,6 +30,20 @@ export default function HomeScreen() {
   const isFocused = useIsFocused();
   const [uuid, setUuid] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+
+  const status = "pending"; // could be: 'active', 'inactive', 'pending', 'error'
+
+  const statusData = {
+    active: { color: "blue", icon: "check" },
+    inactive: { color: "red", icon: "times" },
+    pending: { color: "orange", icon: "hourglass-half" },
+    error: { color: "black", icon: "exclamation" }
+  };
+
+  const { color, icon } = statusData[status] || {
+    color: "gray",
+    icon: "question"
+  };
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -142,26 +157,43 @@ export default function HomeScreen() {
           }}
         />
         {events.length > 0 ? (
-          events.map((event, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.eventCard}
-              onPress={() => navigateToEvent(event)}
-            >
-              <Text style={styles.title}>{event.title}</Text>
-              <Text style={styles.description}>{event.description}</Text>
-              <Text style={styles.date}>{event.date}</Text>
+          events.map((event, index) => {
+            const status = event.status || "pending"; // fallback if status is missing
+            const { color, icon } = statusData[status] || {
+              color: "gray",
+              icon: "question"
+            };
+
+            return (
               <TouchableOpacity
-                style={styles.button}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleDelete(event.id);
-                }}
+                key={index}
+                style={styles.eventCard}
+                onPress={() => navigateToEvent(event)}
               >
-                <Icon name="trash" size={24} color="#fff" />
+                <View style={styles.eventTop}>
+                  <View>
+                    <Text style={styles.title}>{event.title}</Text>
+                    <Text style={styles.description}>{event.description}</Text>
+                  </View>
+                  <View>
+                    <View style={[styles.colorBox, { backgroundColor: color }]}>
+                      <FontAwesome name={icon} size={50} color="white" />
+                    </View>
+                  </View>
+                </View>
+                <Text style={styles.date}>{event.date}</Text>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleDelete(event.id);
+                  }}
+                >
+                  <Icon name="trash" size={24} color="#fff" />
+                </TouchableOpacity>
               </TouchableOpacity>
-            </TouchableOpacity>
-          ))
+            );
+          })
         ) : (
           <Text style={{ textAlign: "center", marginTop: 20 }}>No Events</Text>
         )}
@@ -232,6 +264,12 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginRight: 15
   },
+  eventTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center", // vertically center them if needed
+    backgroundColor: "#f5f5f5"
+  },
   title: {
     fontSize: 18,
     fontWeight: "600",
@@ -289,6 +327,14 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(157, 157, 157, 0.8)",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  colorBox: {
+    width: 75,
+    height: 75,
+    backgroundColor: "blue",
+    borderRadius: 50,
     justifyContent: "center",
     alignItems: "center"
   }

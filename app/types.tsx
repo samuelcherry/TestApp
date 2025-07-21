@@ -3,6 +3,7 @@ export type Event = {
   title: string;
   description: string;
   date: string;
+  status: "active" | "inactive" | "pending" | "error";
 };
 
 export type RootStackParamList = {
