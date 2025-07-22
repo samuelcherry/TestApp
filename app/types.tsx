@@ -10,3 +10,16 @@ export type RootStackParamList = {
   Home: undefined;
   eventDetails: { event: Event };
 };
+
+export type Status =
+  | "selectATime"
+  | "waitingOnOthers"
+  | "noTimeFound"
+  | "timeFound";
+
+export type StatusData = {
+  [key in Status]: {
+    color: string;
+    icon: string;
+  };
+};

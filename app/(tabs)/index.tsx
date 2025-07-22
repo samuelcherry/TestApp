@@ -19,6 +19,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { FontAwesome } from "@expo/vector-icons";
 import { Session } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Status, StatusData } from "../types";
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
@@ -30,19 +31,13 @@ export default function HomeScreen() {
   const isFocused = useIsFocused();
   const [uuid, setUuid] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status>("selectATime");
 
-  const status = "pending"; // could be: 'active', 'inactive', 'pending', 'error'
-
-  const statusData = {
-    active: { color: "blue", icon: "check" },
-    inactive: { color: "red", icon: "times" },
-    pending: { color: "orange", icon: "hourglass-half" },
-    error: { color: "black", icon: "exclamation" }
-  };
-
-  const { color, icon } = statusData[status] || {
-    color: "gray",
-    icon: "question"
+  const statusData: StatusData = {
+    timeFound: { color: "green", icon: "check" },
+    noTimeFound: { color: "red", icon: "times" },
+    waitingOnOthers: { color: "orange", icon: "hourglass-half" },
+    selectATime: { color: "blue", icon: "calendar" }
   };
 
   useEffect(() => {
@@ -107,7 +102,8 @@ export default function HomeScreen() {
           {
             title,
             description,
-            ownerId: uuid
+            ownerId: uuid,
+            status: "selectATime"
           }
         ])
         .select();
@@ -160,7 +156,7 @@ export default function HomeScreen() {
           events.map((event, index) => {
             const status = event.status || "pending"; // fallback if status is missing
             const { color, icon } = statusData[status] || {
-              color: "gray",
+              color: "selectATime",
               icon: "question"
             };
 

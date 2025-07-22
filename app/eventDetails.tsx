@@ -161,7 +161,8 @@ export default function EventDetailsScreen() {
         .from("Events")
         .update({
           dates: selectedDateKeys,
-          times: filteredTimes
+          times: filteredTimes,
+          status: "waitingOnOthers"
         })
         .eq("id", parsedEvent.id);
 
