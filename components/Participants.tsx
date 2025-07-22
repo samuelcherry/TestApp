@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
+import { FontAwesome } from "@expo/vector-icons";
 
 type User = {
   id: string;
@@ -50,6 +51,10 @@ export function Participants() {
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
+  const handleParticipants = () => {
+    console.log("Test");
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -64,7 +69,15 @@ export function Participants() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Pressable style={styles.resultItem}>
-            <Text style={styles.resultText}>{item.username}</Text>
+            <View style={styles.searchResults}>
+              <Pressable
+                onPress={() => handleParticipants()}
+                style={styles.addButton}
+              >
+                <FontAwesome name="plus" size={36} color="#007AFF" />
+              </Pressable>
+              <Text style={styles.resultText}>{item.username}</Text>
+            </View>
           </Pressable>
         )}
       />
@@ -88,5 +101,14 @@ const styles = StyleSheet.create({
   },
   resultText: {
     fontSize: 16
+  },
+  addButton: {
+    marginRight: 10,
+    padding: 6
+  },
+  searchResults: {
+    flexDirection: "row",
+    marginLeft: 5,
+    alignItems: "center"
   }
 });
