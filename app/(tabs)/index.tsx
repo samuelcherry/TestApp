@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import NewEventButton from "@/components/NewEventButton";
 import supabase from "@/supabaseClient";
-import { fetchEvents } from "../API/fetchEvents";
+import { fetchEvents, fetchEventsUserIsIn } from "../API/fetchEvents";
 import { router } from "expo-router";
 import { Event } from "../types";
 import { useIsFocused } from "@react-navigation/native";
@@ -56,8 +56,11 @@ export default function HomeScreen() {
     if (isFocused) {
       const loadEvents = async () => {
         const uuid = await AsyncStorage.getItem("uuid");
+        const username = await AsyncStorage.getItem("username");
         const data = await fetchEvents(uuid);
-        setEvents(data);
+        const participatingEvents = await fetchEventsUserIsIn(username);
+        const combinedEvents = [...data, ...participatingEvents];
+        setEvents(combinedEvents);
       };
       loadEvents();
     }
