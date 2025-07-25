@@ -9,6 +9,7 @@ import {
 import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
 import { FontAwesome } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 
 type User = {
   id: string;
@@ -20,6 +21,8 @@ export function Participants() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [results, setResults] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const { event } = useLocalSearchParams();
+  const parsedEvent = event ? JSON.parse(event as string) : null;
 
   const searchUsers = async (query: string) => {
     if (!query) {
@@ -51,8 +54,36 @@ export function Participants() {
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
-  const handleParticipants = () => {
-    console.log("Test");
+  const handleParticipants = async (username: string) => {
+    try {
+      if (!parsedEvent?.id) {
+        console.error("No event ID found");
+        return;
+      }
+
+      const { data: currentData, error: fetchError } = await supabase
+        .from("Events")
+        .select("participants")
+        .eq("id", parsedEvent.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const existingParticipants = currentData.participants || [];
+
+      const updatedParticipants = [
+        ...new Set([...existingParticipants, username])
+      ];
+
+      const { error: updateError } = await supabase
+        .from("Events")
+        .update({ participants: updatedParticipants })
+        .eq("id", parsedEvent.id);
+      console.log("pressed");
+      if (updateError) throw updateError;
+    } catch (error) {
+      console.error("Error updating participants:", error);
+    }
   };
 
   return (
@@ -71,7 +102,7 @@ export function Participants() {
           <Pressable style={styles.resultItem}>
             <View style={styles.searchResults}>
               <Pressable
-                onPress={() => handleParticipants()}
+                onPress={() => handleParticipants(item.username)}
                 style={styles.addButton}
               >
                 <FontAwesome name="plus" size={36} color="#007AFF" />

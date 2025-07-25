@@ -1,4 +1,3 @@
-import { useLocalSearchParams } from "expo-router";
 import {
   View,
   Text,
@@ -7,10 +6,9 @@ import {
   ScrollView,
   TextInput,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Platform,
-  Keyboard
+  Platform
 } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { Calendar } from "react-native-calendars";
 import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
