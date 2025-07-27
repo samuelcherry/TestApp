@@ -98,6 +98,13 @@ export default function HomeScreen() {
   };
 
   const handleSubmit = async () => {
+    const username = await AsyncStorage.getItem("username");
+
+    if (!username) {
+      console.error("Username not found in AsyncStorage.");
+      return;
+    }
+
     try {
       const { data: userData, error: userError } = await supabase
         .from("Events")
@@ -106,7 +113,8 @@ export default function HomeScreen() {
             title,
             description,
             ownerId: uuid,
-            status: "selectATime"
+            status: "selectATime",
+            times: { [username]: [] }
           }
         ])
         .select();

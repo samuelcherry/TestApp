@@ -15,6 +15,8 @@ import supabase from "@/supabaseClient";
 import DateView from "@/components/DateView";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Participants } from "@/components/Participants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { findSharedTimes } from "@/app/API/compareAvailability";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -146,6 +148,13 @@ export default function EventDetailsScreen() {
   const timeSlots = generateTimeSlots();
 
   const handleSave = async () => {
+    const username = await AsyncStorage.getItem("username");
+
+    if (!username) {
+      console.error("Username not found in AsyncStorage.");
+      return;
+    }
+
     try {
       const selectedDateKeys = Object.keys(selectedDates);
       const filteredTimes: { [key: string]: string[] } = {};
@@ -155,11 +164,25 @@ export default function EventDetailsScreen() {
         }
       });
 
+      const { data: existingData, error: fetchError } = await supabase
+        .from("Events")
+        .select("times")
+        .eq("id", parsedEvent.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const UserIdWithTimes = {
+        ...(existingData?.times || {}),
+        [username]: filteredTimes
+      };
+
+      //Add date/times to supabase
       const { data, error } = await supabase
         .from("Events")
         .update({
           dates: selectedDateKeys,
-          times: filteredTimes,
+          times: UserIdWithTimes,
           status: "waitingOnOthers"
         })
         .eq("id", parsedEvent.id);

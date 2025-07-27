@@ -75,9 +75,28 @@ export function Participants() {
         ...new Set([...existingParticipants, username])
       ];
 
+      const { data, error } = await supabase
+        .from("Events")
+        .select("times")
+        .eq("id", parsedEvent.id)
+        .single();
+
+      if (error) {
+        console.error("Fetch error:", error);
+        return;
+      }
+
+      const currentTimes = data.times || {};
+
       const { error: updateError } = await supabase
         .from("Events")
-        .update({ participants: updatedParticipants })
+        .update({
+          participants: updatedParticipants,
+          times: {
+            ...currentTimes,
+            [username]: []
+          }
+        })
         .eq("id", parsedEvent.id);
       console.log("pressed");
       if (updateError) throw updateError;
