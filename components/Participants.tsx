@@ -94,7 +94,7 @@ export function Participants() {
           participants: updatedParticipants,
           times: {
             ...currentTimes,
-            [username]: []
+            [username]: {}
           }
         })
         .eq("id", parsedEvent.id);
@@ -117,6 +117,7 @@ export function Participants() {
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
+        scrollEnabled={false}
         renderItem={({ item }) => (
           <Pressable style={styles.resultItem}>
             <View style={styles.searchResults}>

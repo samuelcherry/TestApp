@@ -351,29 +351,47 @@ export default function EventDetailsScreen() {
             </Text>
             <ScrollView style={{ maxHeight: 300 }}>
               {savedTimes &&
-                Object.entries(savedTimes).map(([date, times]) => (
-                  <View key={date} style={{ marginBottom: 20 }}>
-                    <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
-                      {date}
+                Object.entries(savedTimes).map(([username, dates]) => (
+                  <View key={username} style={{ marginBottom: 20 }}>
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: 16,
+                        marginBottom: 10,
+                        color: "#333"
+                      }}
+                    >
+                      {username}
                     </Text>
-                    <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                      {times.map((time) => (
-                        <Pressable
-                          key={time}
-                          style={{
-                            backgroundColor: "#1877F2",
-                            borderRadius: 6,
-                            paddingHorizontal: 12,
-                            paddingVertical: 6,
-                            margin: 4
-                          }}
+                    {Object.entries(
+                      dates as unknown as { [date: string]: string[] }
+                    ).map(([date, times]) => (
+                      <View key={date}>
+                        <Text>{date}</Text>
+                        <View
+                          style={{ flexDirection: "row", flexWrap: "wrap" }}
                         >
-                          <Text style={{ color: "white", fontWeight: "600" }}>
-                            {time}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
+                          {times.map((time: string) => (
+                            <Pressable
+                              key={`${date}-${time}`}
+                              style={{
+                                backgroundColor: "#1877F2",
+                                borderRadius: 6,
+                                paddingHorizontal: 12,
+                                paddingVertical: 6,
+                                margin: 4
+                              }}
+                            >
+                              <Text
+                                style={{ color: "white", fontWeight: "600" }}
+                              >
+                                {time}
+                              </Text>
+                            </Pressable>
+                          ))}
+                        </View>
+                      </View>
+                    ))}
                   </View>
                 ))}
             </ScrollView>
