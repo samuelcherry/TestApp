@@ -127,6 +127,7 @@ export default function EventDetailsScreen() {
       if (error) throw error;
 
       setSubmitted(true);
+      setEditingTimes(true);
     } catch (error) {
       console.error(error);
     }
@@ -323,7 +324,6 @@ export default function EventDetailsScreen() {
         ) : editingTimes ? (
           // DATE VIEW (edit times)
           <View>
-            <Text>TEST</Text>
             <DateView
               selectedDates={selectedDates}
               selectedTimes={selectedTimes}
@@ -338,6 +338,7 @@ export default function EventDetailsScreen() {
         ) : (
           // SAVED TIMES
           <View>
+            <Text>TEST</Text>
             <View
               style={{
                 borderBottomColor: "gray", // Line color
@@ -371,24 +372,25 @@ export default function EventDetailsScreen() {
                         <View
                           style={{ flexDirection: "row", flexWrap: "wrap" }}
                         >
-                          {times.map((time: string) => (
-                            <Pressable
-                              key={`${date}-${time}`}
-                              style={{
-                                backgroundColor: "#1877F2",
-                                borderRadius: 6,
-                                paddingHorizontal: 12,
-                                paddingVertical: 6,
-                                margin: 4
-                              }}
-                            >
-                              <Text
-                                style={{ color: "white", fontWeight: "600" }}
+                          {Array.isArray(times) &&
+                            times.map((time: string) => (
+                              <Pressable
+                                key={`${date}-${time}`}
+                                style={{
+                                  backgroundColor: "#1877F2",
+                                  borderRadius: 6,
+                                  paddingHorizontal: 12,
+                                  paddingVertical: 6,
+                                  margin: 4
+                                }}
                               >
-                                {time}
-                              </Text>
-                            </Pressable>
-                          ))}
+                                <Text
+                                  style={{ color: "white", fontWeight: "600" }}
+                                >
+                                  {time}
+                                </Text>
+                              </Pressable>
+                            ))}
                         </View>
                       </View>
                     ))}
