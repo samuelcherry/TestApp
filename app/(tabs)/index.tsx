@@ -179,6 +179,9 @@ export default function HomeScreen() {
               >
                 <View style={styles.eventTop}>
                   <View>
+                    {event.ownerId === uuid && (
+                      <Text style={styles.owner}>OWNER</Text>
+                    )}
                     <Text style={styles.title}>{event.title}</Text>
                     <Text style={styles.description}>{event.description}</Text>
                   </View>
@@ -260,7 +263,6 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     backgroundColor: "#f5f5f5",
-    padding: 16,
     borderRadius: 10,
     marginBottom: 12,
     shadowColor: "#000",
@@ -274,18 +276,20 @@ const styles = StyleSheet.create({
   eventTop: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center", // vertically center them if needed
+    alignItems: "center",
     backgroundColor: "#f5f5f5"
   },
   title: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 4
+    marginBottom: 4,
+    paddingLeft: 16
   },
   description: {
     fontSize: 14,
     color: "#444",
-    marginBottom: 6
+    marginBottom: 6,
+    paddingLeft: 16
   },
   date: {
     fontSize: 12,
@@ -302,7 +306,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     alignSelf: "center",
-    marginTop: 50
+    marginTop: 15,
+    marginBottom: 15
   },
   deleteButton: {
     backgroundColor: "#1877F2",
@@ -341,8 +346,19 @@ const styles = StyleSheet.create({
     width: 75,
     height: 75,
     backgroundColor: "blue",
-    borderRadius: 50,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    borderBottomLeftRadius: 15
+  },
+  owner: {
+    fontWeight: "bold",
+    fontSize: 14,
+    backgroundColor: "#222", // deep gray/black
+    color: "white",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomRightRadius: 5,
+    alignSelf: "flex-start", // so it's not full-width
+    textAlign: "center"
   }
 });

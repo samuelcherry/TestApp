@@ -1,4 +1,5 @@
 export type Event = {
+  ownerId: string;
   id: number;
   title: string;
   description: string;

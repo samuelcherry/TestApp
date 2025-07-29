@@ -204,6 +204,7 @@ export default function EventDetailsScreen() {
     setEditingTimes(false);
   };
 
+  //Edited event details
   const handleEdit = async () => {
     setSubmitted(false);
   };
@@ -338,7 +339,6 @@ export default function EventDetailsScreen() {
         ) : (
           // SAVED TIMES
           <View>
-            <Text>TEST</Text>
             <View
               style={{
                 borderBottomColor: "gray", // Line color
