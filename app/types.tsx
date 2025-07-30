@@ -4,7 +4,9 @@ export type Event = {
   title: string;
   description: string;
   date: string;
-  status: "active" | "inactive" | "pending" | "error";
+  status: {
+    [username: string]: Status;
+  };
 };
 
 export type RootStackParamList = {

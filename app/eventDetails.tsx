@@ -167,11 +167,13 @@ export default function EventDetailsScreen() {
 
       const { data: existingData, error: fetchError } = await supabase
         .from("Events")
-        .select("times")
+        .select("times, status")
         .eq("id", parsedEvent.id)
         .single();
 
       if (fetchError) throw fetchError;
+
+      const currentStatus = existingData.status || {};
 
       const UserIdWithTimes = {
         ...(existingData?.times || {}),
@@ -184,7 +186,7 @@ export default function EventDetailsScreen() {
         .update({
           dates: selectedDateKeys,
           times: UserIdWithTimes,
-          status: "waitingOnOthers"
+          status: { ...currentStatus, [username]: "waitingOnOthers" }
         })
         .eq("id", parsedEvent.id);
 

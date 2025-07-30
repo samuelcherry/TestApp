@@ -77,7 +77,7 @@ export function Participants() {
 
       const { data, error } = await supabase
         .from("Events")
-        .select("times")
+        .select("times, status")
         .eq("id", parsedEvent.id)
         .single();
 
@@ -87,6 +87,7 @@ export function Participants() {
       }
 
       const currentTimes = data.times || {};
+      const currentStatus = data.status || {};
 
       const { error: updateError } = await supabase
         .from("Events")
@@ -95,7 +96,8 @@ export function Participants() {
           times: {
             ...currentTimes,
             [username]: {}
-          }
+          },
+          status: { ...currentStatus, [username]: "selectATime" }
         })
         .eq("id", parsedEvent.id);
       console.log("pressed");

@@ -113,7 +113,7 @@ export default function HomeScreen() {
             title,
             description,
             ownerId: uuid,
-            status: "selectATime",
+            status: { [username]: "selectATime" },
             times: { [username]: [] }
           }
         ])
@@ -165,9 +165,10 @@ export default function HomeScreen() {
         />
         {events.length > 0 ? (
           events.map((event, index) => {
-            const status = event.status || "pending"; // fallback if status is missing
-            const { color, icon } = statusData[status] || {
-              color: "selectATime",
+            const userStatus =
+              (event.status?.[username as string] as Status) || "selectATime";
+            const { color, icon } = statusData[userStatus] || {
+              color: "gray",
               icon: "question"
             };
 
