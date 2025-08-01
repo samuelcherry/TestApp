@@ -67,6 +67,55 @@ export default function HomeScreen() {
   }, [isFocused]);
 
   useEffect(() => {
+    const checkForEmptyTimesArray = async () => {
+      const uuid = await AsyncStorage.getItem("uuid");
+      const data = await fetchEvents(uuid);
+
+      let allReady = true;
+
+      for (const event of data) {
+        const times = event.times;
+
+        const isEventReady = Object.entries(times).every(
+          ([username, dates]) => {
+            if (
+              typeof dates !== "object" ||
+              dates === null ||
+              Array.isArray(dates)
+            ) {
+              console.log(`${username} has invalid date structure`);
+              return false;
+            }
+
+            return Object.entries(dates).every(([date, arr]) => {
+              const isValid = Array.isArray(arr) && arr.length > 0;
+              if (!isValid) {
+                console.log(`${username} → ${date} is empty or invalid`);
+              }
+              return isValid;
+            });
+          }
+        );
+
+        if (!isEventReady) {
+          allReady = false;
+          break; // no need to check further if one event fails
+        }
+      }
+
+      if (allReady) {
+        setStatus("ready");
+        console.log("Ready");
+      } else {
+        setStatus("not ready");
+        console.log("Not Ready");
+      }
+    };
+
+    checkForEmptyTimesArray();
+  }, []);
+
+  useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
       const session: Session | null = data.session;
