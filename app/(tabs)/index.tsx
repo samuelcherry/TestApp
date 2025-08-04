@@ -20,6 +20,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Session } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Status, StatusData } from "../types";
+import { compareTimes } from "../API/compareTimes";
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
@@ -37,7 +38,15 @@ export default function HomeScreen() {
     timeFound: { color: "green", icon: "check" },
     noTimeFound: { color: "red", icon: "times" },
     waitingOnOthers: { color: "orange", icon: "hourglass-half" },
-    selectATime: { color: "blue", icon: "calendar" }
+    selectATime: { color: "blue", icon: "calendar" },
+    ready: {
+      color: "",
+      icon: ""
+    },
+    "not ready": {
+      color: "red",
+      icon: ""
+    }
   };
 
   useEffect(() => {
@@ -72,9 +81,15 @@ export default function HomeScreen() {
       const data = await fetchEvents(uuid);
 
       let allReady = true;
+      let finalTimes = null;
 
       for (const event of data) {
         const times = event.times;
+        if (!times || typeof times !== "object") {
+          console.log("Event has no times or times is not an object");
+          allReady = false;
+          break;
+        }
 
         const isEventReady = Object.entries(times).every(
           ([username, dates]) => {
@@ -84,6 +99,11 @@ export default function HomeScreen() {
               Array.isArray(dates)
             ) {
               console.log(`${username} has invalid date structure`);
+              return false;
+            }
+
+            if (Object.keys(dates).length === 0) {
+              console.log(`${username} has no dates`);
               return false;
             }
 
@@ -101,13 +121,16 @@ export default function HomeScreen() {
           allReady = false;
           break; // no need to check further if one event fails
         }
+
+        finalTimes = times;
       }
 
-      if (allReady) {
+      if (allReady && finalTimes) {
         setStatus("ready");
-        console.log("Ready");
+        compareTimes(finalTimes);
+        console.log("ready");
       } else {
-        setStatus("not ready");
+        setStatus("waitingOnOthers");
         console.log("Not Ready");
       }
     };

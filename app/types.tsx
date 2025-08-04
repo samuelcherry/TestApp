@@ -28,3 +28,14 @@ export type StatusData = {
     icon: string;
   };
 };
+
+export type TimesObject = {
+  [username: string]: {
+    [date: string]: string[];
+  };
+};
+
+export type TimeSlot = {
+  date: string;
+  time: string;
+};
