@@ -18,9 +18,7 @@ export type Status =
   | "selectATime"
   | "waitingOnOthers"
   | "noTimeFound"
-  | "timeFound"
-  | "ready"
-  | "not ready";
+  | "timeFound";
 
 export type StatusData = {
   [key in Status]: {

@@ -13,7 +13,7 @@ import NewEventButton from "@/components/NewEventButton";
 import supabase from "@/supabaseClient";
 import { fetchEvents, fetchEventsUserIsIn } from "../API/fetchEvents";
 import { router } from "expo-router";
-import { Event } from "../types";
+import { Event, TimeSlot } from "../types";
 import { useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FontAwesome } from "@expo/vector-icons";
@@ -38,15 +38,7 @@ export default function HomeScreen() {
     timeFound: { color: "green", icon: "check" },
     noTimeFound: { color: "red", icon: "times" },
     waitingOnOthers: { color: "orange", icon: "hourglass-half" },
-    selectATime: { color: "blue", icon: "calendar" },
-    ready: {
-      color: "",
-      icon: ""
-    },
-    "not ready": {
-      color: "red",
-      icon: ""
-    }
+    selectATime: { color: "blue", icon: "calendar" }
   };
 
   useEffect(() => {
@@ -79,9 +71,11 @@ export default function HomeScreen() {
     const checkForEmptyTimesArray = async () => {
       const uuid = await AsyncStorage.getItem("uuid");
       const data = await fetchEvents(uuid);
+      const username = await AsyncStorage.getItem("username");
 
       let allReady = true;
       let finalTimes = null;
+      let currentEventId = null;
 
       for (const event of data) {
         const times = event.times;
@@ -123,16 +117,44 @@ export default function HomeScreen() {
         }
 
         finalTimes = times;
+        currentEventId = event.id;
       }
 
+      //Compare times
+
+      if (!username) {
+        console.error("Username not found in AsyncStorage.");
+        return;
+      }
+
+      let newStatus: Status;
+      let result: TimeSlot[] = [];
+
       if (allReady && finalTimes) {
-        setStatus("ready");
-        compareTimes(finalTimes);
-        console.log("ready");
+        result = compareTimes(finalTimes);
+        if (result.length === 0) {
+          newStatus = "noTimeFound";
+        } else {
+          newStatus = "timeFound";
+        }
+
+        setStatus(newStatus);
+        console.log("Ready");
       } else {
-        setStatus("waitingOnOthers");
+        newStatus = "waitingOnOthers";
+        setStatus(newStatus);
         console.log("Not Ready");
       }
+
+      const { data: compareData, error: compareError } = await supabase
+        .from("Events")
+        .update([
+          {
+            status: { [username]: newStatus },
+            possibleTimes: result
+          }
+        ])
+        .eq("id", currentEventId);
     };
 
     checkForEmptyTimesArray();

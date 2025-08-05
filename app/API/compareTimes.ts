@@ -16,8 +16,10 @@ export const compareTimes = (times: TimesObject): TimeSlot[] => {
     dateTimeMaps[username] = dateTimeSet;
   }
   const allDateTimeSets = Object.values(dateTimeMaps);
-  if (allDateTimeSets.length === 0) return [];
-
+  if (allDateTimeSets.length === 0) {
+    console.log("No matching times");
+    return [];
+  }
   const commonDateTimes = [...allDateTimeSets[0]].filter((entry) =>
     allDateTimeSets.every((set) => set.has(entry))
   );
@@ -26,6 +28,10 @@ export const compareTimes = (times: TimesObject): TimeSlot[] => {
     const [date, time] = entry.split("|");
     return { date, time };
   });
+
+  if (result.length === 0) {
+    return result;
+  }
 
   console.log("Common date+time:", result);
   return result;

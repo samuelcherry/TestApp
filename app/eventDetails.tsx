@@ -16,7 +16,7 @@ import DateView from "@/components/DateView";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Participants } from "@/components/Participants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { findSharedTimes } from "@/app/API/compareAvailability";
+import { TimeSlot } from "./types";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -40,14 +40,14 @@ export default function EventDetailsScreen() {
   const [description, setDescription] = useState(
     parsedEvent?.description || ""
   );
-
+  const [possibleTimes, setPossibleTimes] = useState<TimeSlot[] | null>(null);
   const fetchEvent = async () => {
     if (!parsedEvent?.id) return;
 
     setLoading(true);
     const { data, error } = await supabase
       .from("Events")
-      .select("dates, title, description, times")
+      .select("dates, title, description, times, possibleTimes")
       .eq("id", parsedEvent.id)
       .single();
 
@@ -65,6 +65,7 @@ export default function EventDetailsScreen() {
 
       setTitle(data.title || "");
       setDescription(data.description || "");
+      setPossibleTimes(data.possibleTimes || "");
     }
 
     setLoading(false);
@@ -259,6 +260,17 @@ export default function EventDetailsScreen() {
             <View>
               <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
               <Text style={{ marginVertical: 10 }}>{description}</Text>
+
+              <Text>POSSIBLE TIMES</Text>
+              {possibleTimes?.length ? (
+                possibleTimes.map((slot, index) => (
+                  <Text key={index}>
+                    {slot.date} at {slot.time}
+                  </Text>
+                ))
+              ) : (
+                <Text>No matching times found</Text>
+              )}
             </View>
             <Pressable
               onPress={handleEditEvent}
