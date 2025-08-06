@@ -21,6 +21,92 @@ import { Session } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Status, StatusData } from "../types";
 import { compareTimes } from "../API/compareTimes";
+import { useStatus } from "../context/StatusContext";
+
+export const checkForEmptyTimesArray = async (
+  setStatus: (status: Status) => void
+) => {
+  const uuid = await AsyncStorage.getItem("uuid");
+  const data = await fetchEvents(uuid);
+  const username = await AsyncStorage.getItem("username");
+
+  let allReady = true;
+  let finalTimes = null;
+  let currentEventId = null;
+
+  for (const event of data) {
+    const times = event.times;
+    if (!times || typeof times !== "object") {
+      console.log("Event has no times or times is not an object");
+      allReady = false;
+      break;
+    }
+
+    const isEventReady = Object.entries(times).every(([username, dates]) => {
+      if (typeof dates !== "object" || dates === null || Array.isArray(dates)) {
+        console.log(`${username} has invalid date structure`);
+        return false;
+      }
+
+      if (Object.keys(dates).length === 0) {
+        console.log(`${username} has no dates`);
+        return false;
+      }
+
+      return Object.entries(dates).every(([date, arr]) => {
+        const isValid = Array.isArray(arr) && arr.length > 0;
+        if (!isValid) {
+          console.log(`${username} → ${date} is empty or invalid`);
+        }
+        return isValid;
+      });
+    });
+
+    if (!isEventReady) {
+      allReady = false;
+      break; // no need to check further if one event fails
+    }
+
+    finalTimes = times;
+    currentEventId = event.id;
+  }
+
+  //Compare times
+
+  if (!username) {
+    console.error("Username not found in AsyncStorage.");
+    return;
+  }
+
+  let newStatus: Status;
+  let result: TimeSlot[] = [];
+
+  if (allReady && finalTimes) {
+    result = compareTimes(finalTimes);
+    if (result.length === 0) {
+      newStatus = "noTimeFound";
+    } else {
+      newStatus = "timeFound";
+    }
+
+    setStatus(newStatus);
+    console.log("Ready");
+  } else {
+    newStatus = "waitingOnOthers";
+    setStatus(newStatus);
+    console.log("Not Ready");
+  }
+
+  const { data: compareData, error: compareError } = await supabase
+    .from("Events")
+    .update([
+      {
+        status: { [username]: newStatus },
+        possibleTimes: result
+      }
+    ])
+    .eq("id", currentEventId);
+};
 
 export default function HomeScreen() {
   const [showForm, setShowForm] = useState(false);
@@ -68,96 +154,7 @@ export default function HomeScreen() {
   }, [isFocused]);
 
   useEffect(() => {
-    const checkForEmptyTimesArray = async () => {
-      const uuid = await AsyncStorage.getItem("uuid");
-      const data = await fetchEvents(uuid);
-      const username = await AsyncStorage.getItem("username");
-
-      let allReady = true;
-      let finalTimes = null;
-      let currentEventId = null;
-
-      for (const event of data) {
-        const times = event.times;
-        if (!times || typeof times !== "object") {
-          console.log("Event has no times or times is not an object");
-          allReady = false;
-          break;
-        }
-
-        const isEventReady = Object.entries(times).every(
-          ([username, dates]) => {
-            if (
-              typeof dates !== "object" ||
-              dates === null ||
-              Array.isArray(dates)
-            ) {
-              console.log(`${username} has invalid date structure`);
-              return false;
-            }
-
-            if (Object.keys(dates).length === 0) {
-              console.log(`${username} has no dates`);
-              return false;
-            }
-
-            return Object.entries(dates).every(([date, arr]) => {
-              const isValid = Array.isArray(arr) && arr.length > 0;
-              if (!isValid) {
-                console.log(`${username} → ${date} is empty or invalid`);
-              }
-              return isValid;
-            });
-          }
-        );
-
-        if (!isEventReady) {
-          allReady = false;
-          break; // no need to check further if one event fails
-        }
-
-        finalTimes = times;
-        currentEventId = event.id;
-      }
-
-      //Compare times
-
-      if (!username) {
-        console.error("Username not found in AsyncStorage.");
-        return;
-      }
-
-      let newStatus: Status;
-      let result: TimeSlot[] = [];
-
-      if (allReady && finalTimes) {
-        result = compareTimes(finalTimes);
-        if (result.length === 0) {
-          newStatus = "noTimeFound";
-        } else {
-          newStatus = "timeFound";
-        }
-
-        setStatus(newStatus);
-        console.log("Ready");
-      } else {
-        newStatus = "waitingOnOthers";
-        setStatus(newStatus);
-        console.log("Not Ready");
-      }
-
-      const { data: compareData, error: compareError } = await supabase
-        .from("Events")
-        .update([
-          {
-            status: { [username]: newStatus },
-            possibleTimes: result
-          }
-        ])
-        .eq("id", currentEventId);
-    };
-
-    checkForEmptyTimesArray();
+    checkForEmptyTimesArray(setStatus);
   }, []);
 
   useEffect(() => {
@@ -231,6 +228,7 @@ export default function HomeScreen() {
     setDescription("");
     setDate("");
     setParticipants("");
+    checkForEmptyTimesArray(setStatus);
   };
 
   const handleDelete = async (id: number) => {
@@ -282,7 +280,7 @@ export default function HomeScreen() {
                   </View>
                   <View>
                     <View style={[styles.colorBox, { backgroundColor: color }]}>
-                      <FontAwesome name={icon} size={50} color="white" />
+                      <FontAwesome name={icon as any} size={50} color="white" />
                     </View>
                   </View>
                 </View>

@@ -17,6 +17,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { Participants } from "@/components/Participants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TimeSlot } from "./types";
+import { useStatus } from "./context/StatusContext";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -43,6 +44,7 @@ export default function EventDetailsScreen() {
   const [possibleTimes, setPossibleTimes] = useState<TimeSlot[] | null>(null);
   const fetchEvent = async () => {
     if (!parsedEvent?.id) return;
+    const { status } = useStatus();
 
     setLoading(true);
     const { data, error } = await supabase
@@ -192,6 +194,7 @@ export default function EventDetailsScreen() {
         .eq("id", parsedEvent.id);
 
       if (error) throw error;
+      await fetchEvent();
 
       setSavedTimes(filteredTimes);
       setSelectedTimes(filteredTimes);
@@ -260,17 +263,30 @@ export default function EventDetailsScreen() {
             <View>
               <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
               <Text style={{ marginVertical: 10 }}>{description}</Text>
-
-              <Text>POSSIBLE TIMES</Text>
-              {possibleTimes?.length ? (
-                possibleTimes.map((slot, index) => (
-                  <Text key={index}>
-                    {slot.date} at {slot.time}
+              <View
+                style={[
+                  styles.possibleTimesContainer,
+                  {
+                    backgroundColor:
+                      possibleTimes && possibleTimes.length !== 0
+                        ? "green"
+                        : "red"
+                  }
+                ]}
+              >
+                <Text style={styles.possibleTimesTitle}>POSSIBLE TIMES</Text>
+                {possibleTimes?.length ? (
+                  possibleTimes.map((slot, index) => (
+                    <Text style={styles.possibleTimes} key={index}>
+                      {slot.date} at {slot.time}
+                    </Text>
+                  ))
+                ) : (
+                  <Text style={styles.possibleTimes}>
+                    No matching times found
                   </Text>
-                ))
-              ) : (
-                <Text>No matching times found</Text>
-              )}
+                )}
+              </View>
             </View>
             <Pressable
               onPress={handleEditEvent}
@@ -548,5 +564,20 @@ const styles = StyleSheet.create({
   timeOptionTextSelected: {
     color: "#fff",
     fontWeight: "bold"
+  },
+  possibleTimesTitle: {
+    fontWeight: 800,
+    fontSize: 30,
+    color: "white"
+  },
+  possibleTimes: {
+    fontWeight: 400,
+    fontSize: 15,
+    color: "white"
+  },
+  possibleTimesContainer: {
+    padding: 15,
+    alignItems: "center",
+    borderRadius: 15
   }
 });

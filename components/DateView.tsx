@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { checkForEmptyTimesArray } from "../app/(tabs)/index";
 
 interface DateViewProps {
   selectedDates: { [key: string]: any };
