@@ -24,6 +24,14 @@ export function Participants() {
   const { event } = useLocalSearchParams();
   const parsedEvent = event ? JSON.parse(event as string) : null;
 
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      searchUsers(searchQuery);
+    }, 300); // Debounce input to avoid spamming DB
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
   const searchUsers = async (query: string) => {
     if (!query) {
       setResults([]);
@@ -45,14 +53,6 @@ export function Participants() {
     }
     setLoading(false);
   };
-
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      searchUsers(searchQuery);
-    }, 300); // Debounce input to avoid spamming DB
-
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
 
   const handleParticipants = async (username: string) => {
     try {

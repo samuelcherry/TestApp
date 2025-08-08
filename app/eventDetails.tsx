@@ -241,7 +241,7 @@ export default function EventDetailsScreen() {
     }
     setEditEvent(false);
   };
-
+  //Seperate Views into their own components
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -446,7 +446,7 @@ export default function EventDetailsScreen() {
     </KeyboardAvoidingView>
   );
 }
-
+//Same note as index, I'd like to move this somewhere central
 const styles = StyleSheet.create({
   button: {
     backgroundColor: "#1877F2",

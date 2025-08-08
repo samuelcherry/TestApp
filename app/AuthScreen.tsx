@@ -92,7 +92,7 @@ export default function AuthScreen() {
     await AsyncStorage.setItem("username", profile.username);
 
     Alert.alert("Logged in!");
-    router.replace("/(tabs)/" as const);
+    router.replace("/(tabs)/" as any);
   };
 
   return (

@@ -23,6 +23,8 @@ import { Status, StatusData } from "../types";
 import { compareTimes } from "../API/compareTimes";
 import { useStatus } from "../context/StatusContext";
 
+//seperated so it can be used in other functions
+//might be good to move to it's own script
 export const checkForEmptyTimesArray = async (
   setStatus: (status: Status) => void
 ) => {
@@ -97,6 +99,7 @@ export const checkForEmptyTimesArray = async (
     console.log("Not Ready");
   }
 
+  //Do i need data and error it they're never used?
   const { data: compareData, error: compareError } = await supabase
     .from("Events")
     .update([
@@ -120,6 +123,7 @@ export default function HomeScreen() {
   const [username, setUsername] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("selectATime");
 
+  //should/could this go in the types file?
   const statusData: StatusData = {
     timeFound: { color: "green", icon: "check" },
     noTimeFound: { color: "red", icon: "times" },
@@ -127,6 +131,7 @@ export default function HomeScreen() {
     selectATime: { color: "blue", icon: "calendar" }
   };
 
+  //Can these be combined since all their depedency arrays are empty?
   useEffect(() => {
     const loadUserData = async () => {
       const uuid = await AsyncStorage.getItem("uuid");
@@ -137,24 +142,6 @@ export default function HomeScreen() {
     };
 
     loadUserData();
-  }, []);
-
-  useEffect(() => {
-    if (isFocused) {
-      const loadEvents = async () => {
-        const uuid = await AsyncStorage.getItem("uuid");
-        const username = await AsyncStorage.getItem("username");
-        const data = await fetchEvents(uuid);
-        const participatingEvents = await fetchEventsUserIsIn(username);
-        const combinedEvents = [...data, ...participatingEvents];
-        setEvents(combinedEvents);
-      };
-      loadEvents();
-    }
-  }, [isFocused]);
-
-  useEffect(() => {
-    checkForEmptyTimesArray(setStatus);
   }, []);
 
   useEffect(() => {
@@ -181,13 +168,31 @@ export default function HomeScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    checkForEmptyTimesArray(setStatus);
+  }, []);
+
+  useEffect(() => {
+    if (isFocused) {
+      const loadEvents = async () => {
+        const uuid = await AsyncStorage.getItem("uuid");
+        const username = await AsyncStorage.getItem("username");
+        const data = await fetchEvents(uuid);
+        const participatingEvents = await fetchEventsUserIsIn(username);
+        const combinedEvents = [...data, ...participatingEvents];
+        setEvents(combinedEvents);
+      };
+      loadEvents();
+    }
+  }, [isFocused]);
+
   const navigateToEvent = (event: Event) => {
     router.push({
       pathname: "/eventDetails",
       params: { event: JSON.stringify(event) }
     });
   };
-
+  //I'd like to move handle functions into components or into seperate scripts
   const handleSubmit = async () => {
     const username = await AsyncStorage.getItem("username");
 
@@ -244,7 +249,7 @@ export default function HomeScreen() {
       console.log("Delete");
     } catch (error) {}
   };
-
+  //I'd like to move each view into it's own component like "DateView"
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.container}>
@@ -328,7 +333,7 @@ export default function HomeScreen() {
     </View>
   );
 }
-
+//Can/should this be moved to a centralized script so stypes can be shared across files?
 const styles = StyleSheet.create({
   container: {
     padding: 24,
