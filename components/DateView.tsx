@@ -1,4 +1,3 @@
-import { useLocalSearchParams } from "expo-router";
 import {
   View,
   Text,
@@ -9,7 +8,6 @@ import {
 } from "react-native";
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { checkForEmptyTimesArray } from "../app/(tabs)/index";
 
 interface DateViewProps {
   selectedDates: { [key: string]: any };
@@ -18,7 +16,7 @@ interface DateViewProps {
   timeSlots: string[];
   expandedDate: string | null;
   setExpandedDate: React.Dispatch<React.SetStateAction<string | null>>;
-  handleSave: () => void;
+  handleSaveTimes: () => void;
   handleEdit: () => void;
 }
 
@@ -29,7 +27,7 @@ export default function DateView({
   timeSlots,
   expandedDate,
   setExpandedDate,
-  handleSave,
+  handleSaveTimes,
   handleEdit
 }: DateViewProps) {
   return (
@@ -105,7 +103,7 @@ export default function DateView({
           <Icon name="edit" size={24} color="#fff" />
         </Pressable>
         <Pressable
-          onPress={handleSave}
+          onPress={handleSaveTimes}
           style={({ hovered, pressed }) => [
             styles.editButton,
             hovered && styles.hover,

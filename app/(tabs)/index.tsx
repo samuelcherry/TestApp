@@ -70,6 +70,7 @@ export const checkForEmptyTimesArray = async (
     }
 
     finalTimes = times;
+    console.log("FUNCTION RUN: ", finalTimes);
     currentEventId = event.id;
   }
 
@@ -100,7 +101,7 @@ export const checkForEmptyTimesArray = async (
   }
 
   //Do i need data and error it they're never used?
-  const { data: compareData, error: compareError } = await supabase
+  await supabase
     .from("Events")
     .update([
       {
@@ -131,7 +132,6 @@ export default function HomeScreen() {
     selectATime: { color: "blue", icon: "calendar" }
   };
 
-  //Can these be combined since all their depedency arrays are empty?
   useEffect(() => {
     const loadUserData = async () => {
       const uuid = await AsyncStorage.getItem("uuid");
@@ -142,9 +142,7 @@ export default function HomeScreen() {
     };
 
     loadUserData();
-  }, []);
 
-  useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
       const session: Session | null = data.session;
@@ -163,13 +161,12 @@ export default function HomeScreen() {
         }
       }
     );
+
+    checkForEmptyTimesArray(setStatus);
+
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
-
-  useEffect(() => {
-    checkForEmptyTimesArray(setStatus);
   }, []);
 
   useEffect(() => {
@@ -188,12 +185,11 @@ export default function HomeScreen() {
 
   const navigateToEvent = (event: Event) => {
     router.push({
-      pathname: "/eventDetails",
+      pathname: "/events/eventDetails",
       params: { event: JSON.stringify(event) }
     });
   };
-  //I'd like to move handle functions into components or into seperate scripts
-  const handleSubmit = async () => {
+  const handleSaveEvent = async () => {
     const username = await AsyncStorage.getItem("username");
 
     if (!username) {
@@ -221,7 +217,7 @@ export default function HomeScreen() {
         const newEvent = userData[0];
         setEvents((prev) => [...prev, newEvent]);
         router.push({
-          pathname: "/eventDetails",
+          pathname: "/events/eventDetails",
           params: { event: JSON.stringify(newEvent) }
         });
       }
@@ -249,7 +245,6 @@ export default function HomeScreen() {
       console.log("Delete");
     } catch (error) {}
   };
-  //I'd like to move each view into it's own component like "DateView"
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.container}>
@@ -324,7 +319,7 @@ export default function HomeScreen() {
               placeholder="Event Description"
             />
             <View style={styles.buttonRow}>
-              <Button title="Submit" onPress={handleSubmit} />
+              <Button title="Submit" onPress={handleSaveEvent} />
               <Button title="Close" onPress={() => setShowForm(false)} />
             </View>
           </View>

@@ -13,11 +13,13 @@ import { Calendar } from "react-native-calendars";
 import { useState, useEffect } from "react";
 import supabase from "@/supabaseClient";
 import DateView from "@/components/DateView";
+import TimesView from "@/components/TimesView";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Participants } from "@/components/Participants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TimeSlot } from "./types";
-import { useStatus } from "./context/StatusContext";
+import { TimeSlot } from "../../types";
+import { checkForEmptyTimesArray } from "..";
+import { useStatus } from "../../context/StatusContext";
 
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
@@ -33,7 +35,7 @@ export default function EventDetailsScreen() {
     [date: string]: string[];
   }>({});
   const [savedTimes, setSavedTimes] = useState<{
-    [date: string]: string[];
+    [username: string]: { [date: string]: string[] };
   } | null>(null);
   const [editingTimes, setEditingTimes] = useState(false);
   const [editEvent, setEditEvent] = useState(false);
@@ -42,9 +44,10 @@ export default function EventDetailsScreen() {
     parsedEvent?.description || ""
   );
   const [possibleTimes, setPossibleTimes] = useState<TimeSlot[] | null>(null);
+  const { status, setStatus } = useStatus();
+
   const fetchEvent = async () => {
     if (!parsedEvent?.id) return;
-    const { status } = useStatus();
 
     setLoading(true);
     const { data, error } = await supabase
@@ -67,7 +70,7 @@ export default function EventDetailsScreen() {
 
       setTitle(data.title || "");
       setDescription(data.description || "");
-      setPossibleTimes(data.possibleTimes || "");
+      setPossibleTimes(data.possibleTimes || null);
     }
 
     setLoading(false);
@@ -116,13 +119,13 @@ export default function EventDetailsScreen() {
     });
   };
 
-  const handleSubmit = async (
+  const handleSaveDates = async (
     eventId: number,
     newDatesObject: { [key: string]: any }
   ) => {
     try {
       const newDatesArray = newDatesObject;
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("Events")
         .update({ dates: newDatesArray })
         .eq("id", eventId);
@@ -151,7 +154,7 @@ export default function EventDetailsScreen() {
 
   const timeSlots = generateTimeSlots();
 
-  const handleSave = async () => {
+  const handleSaveTimes = async () => {
     const username = await AsyncStorage.getItem("username");
 
     if (!username) {
@@ -167,6 +170,12 @@ export default function EventDetailsScreen() {
           filteredTimes[date] = selectedTimes[date];
         }
       });
+
+      setSavedTimes((prev) => ({
+        ...prev,
+        [username]: filteredTimes
+      }));
+      setSelectedTimes(filteredTimes);
 
       const { data: existingData, error: fetchError } = await supabase
         .from("Events")
@@ -184,7 +193,7 @@ export default function EventDetailsScreen() {
       };
 
       //Add date/times to supabase
-      const { data, error } = await supabase
+      await supabase
         .from("Events")
         .update({
           dates: selectedDateKeys,
@@ -193,14 +202,13 @@ export default function EventDetailsScreen() {
         })
         .eq("id", parsedEvent.id);
 
-      if (error) throw error;
       await fetchEvent();
 
-      setSavedTimes(filteredTimes);
       setSelectedTimes(filteredTimes);
       setSubmitted(true);
       setEditingTimes(false);
       setExpandedDate(null);
+      await checkForEmptyTimesArray(setStatus);
     } catch (error) {
       console.error("Error during insert:", error);
     }
@@ -222,7 +230,7 @@ export default function EventDetailsScreen() {
 
   const handleEditSave = async () => {
     try {
-      const { data: userData, error: userError } = await supabase
+      const { data, error: userError } = await supabase
         .from("Events")
         .update([
           {
@@ -252,6 +260,7 @@ export default function EventDetailsScreen() {
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* EVENT HEADER */}
         {!editEvent ? (
           <View
             style={{
@@ -341,7 +350,7 @@ export default function EventDetailsScreen() {
             />
             <Pressable
               onPress={() =>
-                handleSubmit(parsedEvent.id, Object.keys(selectedDates))
+                handleSaveDates(parsedEvent.id, Object.keys(selectedDates))
               }
               style={({ hovered }) => [
                 styles.editButton,
@@ -362,81 +371,17 @@ export default function EventDetailsScreen() {
               timeSlots={timeSlots}
               expandedDate={expandedDate}
               setExpandedDate={setExpandedDate}
-              handleSave={handleSave}
+              handleSaveTimes={handleSaveTimes}
               handleEdit={handleEdit}
             />
           </View>
         ) : (
-          // SAVED TIMES
+          //Times View
           <View>
-            <View
-              style={{
-                borderBottomColor: "gray", // Line color
-                borderBottomWidth: StyleSheet.hairlineWidth, // Thin line
-                marginTop: 16,
-                marginBottom: 16
-              }}
+            <TimesView
+              savedTimes={savedTimes}
+              setEditingTimes={setEditingTimes}
             />
-            <Text style={{ marginVertical: 10, fontWeight: "bold" }}>
-              Your selected times:
-            </Text>
-            <ScrollView style={{ maxHeight: 300 }}>
-              {savedTimes &&
-                Object.entries(savedTimes).map(([username, dates]) => (
-                  <View key={username} style={{ marginBottom: 20 }}>
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: 16,
-                        marginBottom: 10,
-                        color: "#333"
-                      }}
-                    >
-                      {username}
-                    </Text>
-                    {Object.entries(
-                      dates as unknown as { [date: string]: string[] }
-                    ).map(([date, times]) => (
-                      <View key={date}>
-                        <Text>{date}</Text>
-                        <View
-                          style={{ flexDirection: "row", flexWrap: "wrap" }}
-                        >
-                          {Array.isArray(times) &&
-                            times.map((time: string) => (
-                              <Pressable
-                                key={`${date}-${time}`}
-                                style={{
-                                  backgroundColor: "#1877F2",
-                                  borderRadius: 6,
-                                  paddingHorizontal: 12,
-                                  paddingVertical: 6,
-                                  margin: 4
-                                }}
-                              >
-                                <Text
-                                  style={{ color: "white", fontWeight: "600" }}
-                                >
-                                  {time}
-                                </Text>
-                              </Pressable>
-                            ))}
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                ))}
-            </ScrollView>
-            <Pressable
-              onPress={() => setEditingTimes(true)}
-              style={({ hovered }) => [
-                styles.editButton,
-                hovered && styles.hover,
-                pressed && styles.pressed
-              ]}
-            >
-              <Icon name="edit" size={24} color="#fff" />
-            </Pressable>
           </View>
         )}
         <View>
