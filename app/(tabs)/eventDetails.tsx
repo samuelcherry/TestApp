@@ -23,9 +23,6 @@ import { useStatus } from "../context/StatusContext";
 import { useFocusEffect } from "@react-navigation/native";
 import React from "react";
 
-export const options = {
-  tabBarStyle: { display: "none" }
-};
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
   const parsedEvent = event ? JSON.parse(event as string) : null;

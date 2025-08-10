@@ -45,6 +45,15 @@ export default function TabLayout() {
             )
           }}
         />
+        <Tabs.Screen
+          name="eventDetails"
+          options={{
+            title: "Event Details",
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="calendar-today" size={24} color="grey" />
+            )
+          }}
+        />
       </Tabs>
     </StatusProvider>
   );
