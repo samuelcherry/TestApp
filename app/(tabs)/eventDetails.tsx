@@ -17,10 +17,15 @@ import TimesView from "@/components/TimesView";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Participants } from "@/components/Participants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TimeSlot } from "../../types";
-import { checkForEmptyTimesArray } from "..";
-import { useStatus } from "../../context/StatusContext";
+import { TimeSlot } from "../types";
+import { checkForEmptyTimesArray } from ".";
+import { useStatus } from "../context/StatusContext";
+import { useFocusEffect } from "@react-navigation/native";
+import React from "react";
 
+export const options = {
+  tabBarStyle: { display: "none" }
+};
 export default function EventDetailsScreen() {
   const { event } = useLocalSearchParams();
   const parsedEvent = event ? JSON.parse(event as string) : null;
@@ -79,6 +84,13 @@ export default function EventDetailsScreen() {
   useEffect(() => {
     fetchEvent();
   }, [parsedEvent?.id]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      checkForEmptyTimesArray(setStatus);
+      fetchEvent();
+    }, [])
+  );
 
   const convertArrayToMarkedDates = (datesArray: string[]) => {
     const markedDates: { [key: string]: any } = {};
@@ -208,7 +220,8 @@ export default function EventDetailsScreen() {
       setSubmitted(true);
       setEditingTimes(false);
       setExpandedDate(null);
-      await checkForEmptyTimesArray(setStatus);
+      checkForEmptyTimesArray(setStatus);
+      fetchEvent();
     } catch (error) {
       console.error("Error during insert:", error);
     }

@@ -185,9 +185,10 @@ export default function HomeScreen() {
 
   const navigateToEvent = (event: Event) => {
     router.push({
-      pathname: "/events/eventDetails",
+      pathname: "/eventDetails",
       params: { event: JSON.stringify(event) }
     });
+    checkForEmptyTimesArray(setStatus);
   };
   const handleSaveEvent = async () => {
     const username = await AsyncStorage.getItem("username");
@@ -217,9 +218,10 @@ export default function HomeScreen() {
         const newEvent = userData[0];
         setEvents((prev) => [...prev, newEvent]);
         router.push({
-          pathname: "/events/eventDetails",
+          pathname: "/eventDetails",
           params: { event: JSON.stringify(newEvent) }
         });
+        checkForEmptyTimesArray(setStatus);
       }
     } catch (error) {
       console.error("Error during insert:", error);
