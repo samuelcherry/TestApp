@@ -37,6 +37,7 @@ export const checkForEmptyTimesArray = async (
   let currentEventId = null;
 
   for (const event of data) {
+    currentEventId = event.id;
     const times = event.times;
     if (!times || typeof times !== "object") {
       console.log("Event has no times or times is not an object");
@@ -95,12 +96,12 @@ export const checkForEmptyTimesArray = async (
     setStatus(newStatus);
     console.log("Ready");
   } else {
+    result = [];
     newStatus = "waitingOnOthers";
     setStatus(newStatus);
     console.log("Not Ready");
   }
 
-  //Do i need data and error it they're never used?
   await supabase
     .from("Events")
     .update([

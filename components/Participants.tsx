@@ -118,7 +118,7 @@ export function Participants() {
       {loading && <Text>Searching...</Text>}
       <FlatList
         data={results}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.username}-${index}`}
         scrollEnabled={false}
         renderItem={({ item }) => (
           <Pressable style={styles.resultItem}>

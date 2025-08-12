@@ -56,7 +56,7 @@ export default function EventDetailsScreen() {
       .from("Events")
       .select("dates, title, description, times, possibleTimes")
       .eq("id", parsedEvent.id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error fetching event:", error);
