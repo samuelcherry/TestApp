@@ -1,50 +1,91 @@
-# Welcome to your Expo app 👋
+CalAlign
+CalAlign is a lightweight scheduling app designed specifically for friends. It solves the common problem of finding times when everyone is available — without bloated pro subscriptions or messy, hard-to-follow group text chains.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Built with React Native (using Expo), Material UI, and powered by Supabase for backend services, CalAlign focuses on simplicity and ease of use.
 
-## Get started
+Features
+Create and join events with friends
 
-1. Install dependencies
+Share and compare available times easily
 
-   ```bash
-   npm install
-   ```
+Automatic conflict detection
 
-2. Start the app
+Real-time updates using Supabase
 
-   ```bash
-    npx expo start
-   ```
+Clean, responsive UI with Material Design principles
 
-In the output, you'll find options to open the app in a
+Tech Stack
+React Native (Expo)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Material UI (interface components)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Supabase (backend and database)
 
-## Get a fresh project
+AsyncStorage (local device storage)
 
-When you're ready, run:
+TypeScript for type safety
 
-```bash
-npm run reset-project
-```
+Project Structure
+bash
+Copy
+Edit
+app/
+├── tabs/ # Main navigation tabs: index, profiles, eventDetails
+├── API/ # API interaction utilities
+├── context/ # React context providers and hooks
+├── assets/ # Static assets like images, icons
+├── components/ # Reusable UI components and views
+│ ├── ui/ # UI primitives and themed components
+│ ├── **tests**/ # Component tests
+│ ├── Collapsible.tsx
+│ ├── DateView.tsx
+│ ├── ExternalLink.tsx
+│ ├── ... # Other components
+├── constants/ # App-wide constants and enums
+├── hooks/ # Custom React hooks
+Installation & Running
+Ensure you have Node.js installed (v16+ recommended).
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Install Expo CLI globally if needed:
 
-## Learn more
+bash
+Copy
+Edit
+npm install -g expo-cli
+Clone the repo:
 
-To learn more about developing your project with Expo, look at the following resources:
+bash
+Copy
+Edit
+git clone https://github.com/samuelcherry/TestApp.git
+cd TestApp
+Install dependencies:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+bash
+Copy
+Edit
+npm install
+Start Expo server:
 
-## Join the community
+bash
+Copy
+Edit
+expo start
+Use the Expo Go app on your phone to scan the QR code or launch on a simulator.
 
-Join our community of developers creating universal apps.
+Usage
+Sign in using your account (powered by Supabase auth).
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Create new events and invite friends to input their available times.
+
+View everyone's shared schedules to find common free slots quickly.
+
+Receive real-time updates when participants change their availability.
+
+Contributing
+Contributions are welcome! Feel free to open issues or submit pull requests for improvements or bug fixes.
+
+License
+MIT License
+
+If you want, I can generate a ready-to-use README.md text file for you to copy directly into your repo. Would you like that?
