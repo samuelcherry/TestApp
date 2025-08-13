@@ -36,10 +36,11 @@ app/
 ├── components/ # Reusable UI components views
 │ ├── ui/ # UI primitives and themed components
 │ ├── **tests**/ # Component tests
-│ ├── Collapsible.tsx
 │ ├── DateView.tsx
-│ ├── ExternalLink.tsx
-│ ├── ... # Other components
+│ ├── HapticTab.tsx
+│ ├── NewEventButton.tsx
+│ ├── Participants.tsx
+│ ├── TimesView.Tsx
 ├── constants/ # App-wide constants and enums
 ├── hooks/ # Custom React hooks
 ```
@@ -84,7 +85,4 @@ View everyone's shared schedules to find common free slots quickly.
 Receive real-time updates when participants change their availability.
 
 Contributing
-Contributions are welcome! Feel free to open issues or submit pull requests for improvements or bug fixes.
-
-License
-MIT License
+Not looking for contributions currently as this is a portfolio project showing my personal abilities
