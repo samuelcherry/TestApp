@@ -271,7 +271,11 @@ export default function EventDetailsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* EVENT HEADER */}
-        {!editEvent ? (
+        {!fetchEvent ? (
+          <View>
+            <Text>Test</Text>
+          </View>
+        ) : !editEvent ? (
           <View
             style={{
               flexDirection: "row",
@@ -401,6 +405,7 @@ export default function EventDetailsScreen() {
     </KeyboardAvoidingView>
   );
 }
+
 //Same note as index, I'd like to move this somewhere central
 const styles = StyleSheet.create({
   button: {

@@ -14,7 +14,10 @@ export default function TimesView({
   setEditingTimes
 }: TimesViewProps) {
   return (
-    <View>
+    <ScrollView
+      contentContainerStyle={{ padding: 16 }}
+      keyboardShouldPersistTaps="handled"
+    >
       <View
         style={{
           borderBottomColor: "gray", // Line color
@@ -75,7 +78,7 @@ export default function TimesView({
       >
         <Icon name="edit" size={24} color="#fff" />
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
