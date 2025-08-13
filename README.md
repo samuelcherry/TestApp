@@ -28,14 +28,12 @@ TypeScript for type safety
 Project Structure
 
 ```bash
-Copy
-Edit
 app/
 ├── tabs/ # Main navigation tabs: index, profiles, eventDetails
 ├── API/ # API interaction utilities
 ├── context/ # React context providers and hooks
 ├── assets/ # Static assets like images, icons
-├── components/ # Reusable UI components and views
+├── components/ # Reusable UI components views
 │ ├── ui/ # UI primitives and themed components
 │ ├── **tests**/ # Component tests
 │ ├── Collapsible.tsx
@@ -52,16 +50,12 @@ Ensure you have Node.js installed (v16+ recommended).
 Install Expo CLI globally if needed:
 
 ```bash
-Copy
-Edit
 npm install -g expo-cli
 ```
 
 Clone the repo:
 
 ```bash
-Copy
-Edit
 git clone https://github.com/samuelcherry/TestApp.git
 cd TestApp
 ```
@@ -69,16 +63,12 @@ cd TestApp
 Install dependencies:
 
 ```bash
-Copy
-Edit
 npm install
 ```
 
 Start Expo server:
 
 ```bash
-Copy
-Edit
 expo start
 ```
 
