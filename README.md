@@ -26,7 +26,8 @@ AsyncStorage (local device storage)
 TypeScript for type safety
 
 Project Structure
-bash
+
+```bash
 Copy
 Edit
 app/
@@ -43,34 +44,44 @@ app/
 │ ├── ... # Other components
 ├── constants/ # App-wide constants and enums
 ├── hooks/ # Custom React hooks
+```
+
 Installation & Running
 Ensure you have Node.js installed (v16+ recommended).
 
 Install Expo CLI globally if needed:
 
-bash
+```bash
 Copy
 Edit
 npm install -g expo-cli
+```
+
 Clone the repo:
 
-bash
+```bash
 Copy
 Edit
 git clone https://github.com/samuelcherry/TestApp.git
 cd TestApp
+```
+
 Install dependencies:
 
-bash
+```bash
 Copy
 Edit
 npm install
+```
+
 Start Expo server:
 
-bash
+```bash
 Copy
 Edit
 expo start
+```
+
 Use the Expo Go app on your phone to scan the QR code or launch on a simulator.
 
 Usage
@@ -87,5 +98,3 @@ Contributions are welcome! Feel free to open issues or submit pull requests for 
 
 License
 MIT License
-
-If you want, I can generate a ready-to-use README.md text file for you to copy directly into your repo. Would you like that?
