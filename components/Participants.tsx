@@ -24,6 +24,7 @@ export function Participants() {
   const { event } = useLocalSearchParams();
   const parsedEvent = event ? JSON.parse(event as string) : null;
 
+  //Searching users from the search bar results
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       searchUsers(searchQuery);
@@ -54,6 +55,7 @@ export function Participants() {
     setLoading(false);
   };
 
+  //setting the participants array and updating the db to reflect that array
   const handleParticipants = async (username: string) => {
     try {
       if (!parsedEvent?.id) {

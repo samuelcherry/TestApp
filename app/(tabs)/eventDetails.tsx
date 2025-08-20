@@ -47,7 +47,7 @@ export default function EventDetailsScreen() {
   );
   const [possibleTimes, setPossibleTimes] = useState<TimeSlot[] | null>(null);
   const { status, setStatus } = useStatus();
-
+  //Fetch event data and save it for use throughout
   const fetchEvent = async () => {
     if (!parsedEvent?.id) return;
 
@@ -78,10 +78,12 @@ export default function EventDetailsScreen() {
     setLoading(false);
   };
 
+  //fetch the event data when the event loads
   useEffect(() => {
     fetchEvent();
   }, [parsedEvent?.id]);
 
+  //fetch event data when the event is focused on. This is updating the event display when you change tabs
   useFocusEffect(
     React.useCallback(() => {
       checkForEmptyTimesArray(setStatus);
@@ -89,6 +91,7 @@ export default function EventDetailsScreen() {
     }, [])
   );
 
+  //visually show which dates were selected
   const convertArrayToMarkedDates = (datesArray: string[]) => {
     const markedDates: { [key: string]: any } = {};
     datesArray.forEach((date) => {
@@ -97,6 +100,7 @@ export default function EventDetailsScreen() {
     return markedDates;
   };
 
+  //set the array of selected times for saving later
   const toggleTimeForDate = (date: string, time: string) => {
     setSelectedTimes((prev) => {
       const currentTimes = prev[date] || [];
@@ -112,6 +116,7 @@ export default function EventDetailsScreen() {
     });
   };
 
+  //show which dates have been selected
   const toggleDate = (day: { dateString: string }) => {
     const date = day.dateString;
     setSelectedDates((prev) => {
@@ -127,7 +132,7 @@ export default function EventDetailsScreen() {
       return updated;
     });
   };
-
+  //saving the dates to the DB
   const handleSaveDates = async (
     eventId: number,
     newDatesObject: { [key: string]: any }
@@ -148,6 +153,7 @@ export default function EventDetailsScreen() {
     }
   };
 
+  //only show dates in 30 minute increments
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -163,6 +169,7 @@ export default function EventDetailsScreen() {
 
   const timeSlots = generateTimeSlots();
 
+  //Saving times into the DB
   const handleSaveTimes = async () => {
     const username = await AsyncStorage.getItem("username");
 
@@ -238,6 +245,7 @@ export default function EventDetailsScreen() {
     console.log("Edit event");
   };
 
+  //saving changes to event details
   const handleEditSave = async () => {
     try {
       const { data, error: userError } = await supabase
@@ -259,7 +267,7 @@ export default function EventDetailsScreen() {
     }
     setEditEvent(false);
   };
-  //Seperate Views into their own components
+  //Seperated Views into their own components
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}

@@ -1,5 +1,5 @@
 import { TimesObject, TimeSlot } from "../types";
-
+//if all the participants have submitted times, check if there are any times in common and set status accordingly
 export const compareTimes = (times: TimesObject): TimeSlot[] => {
   const users = Object.keys(times);
   const dateTimeMaps: { [username: string]: Set<string> } = {};

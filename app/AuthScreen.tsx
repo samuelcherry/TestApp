@@ -17,6 +17,7 @@ export default function AuthScreen() {
   const [username, setUsername] = useState("");
   const [isSignup, setIsSignUp] = useState(false);
 
+  //check for login or registration
   const handleAuth = async () => {
     if (isSignup) {
       await handleRegistration();
@@ -24,7 +25,7 @@ export default function AuthScreen() {
       await handleLogin();
     }
   };
-
+  //register the user
   const handleRegistration = async () => {
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp(
       {
@@ -56,6 +57,7 @@ export default function AuthScreen() {
       Alert.alert("Success", "Check your email to confirm registration.");
     }
   };
+  //login the user
   const handleLogin = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

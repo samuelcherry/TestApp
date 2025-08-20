@@ -125,7 +125,7 @@ export default function HomeScreen() {
   const [username, setUsername] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("selectATime");
 
-  //should/could this go in the types file?
+  //set up the different status' and their icons
   const statusData: StatusData = {
     timeFound: { color: "green", icon: "check" },
     noTimeFound: { color: "red", icon: "times" },
@@ -133,6 +133,7 @@ export default function HomeScreen() {
     selectATime: { color: "blue", icon: "calendar" }
   };
 
+  //loading user data and saving it for later use
   useEffect(() => {
     const loadUserData = async () => {
       const uuid = await AsyncStorage.getItem("uuid");
@@ -143,7 +144,7 @@ export default function HomeScreen() {
     };
 
     loadUserData();
-
+    //checking the credincails of the person logging in
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
       const session: Session | null = data.session;
@@ -169,7 +170,7 @@ export default function HomeScreen() {
       listener.subscription.unsubscribe();
     };
   }, []);
-
+  //loading event data and saving pieces for later use
   useEffect(() => {
     if (isFocused) {
       const loadEvents = async () => {
@@ -183,7 +184,7 @@ export default function HomeScreen() {
       loadEvents();
     }
   }, [isFocused]);
-
+  //go to the event you click on
   const navigateToEvent = (event: Event) => {
     router.push({
       pathname: "/eventDetails",
@@ -191,6 +192,8 @@ export default function HomeScreen() {
     });
     checkForEmptyTimesArray(setStatus);
   };
+
+  //saving event creation
   const handleSaveEvent = async () => {
     const username = await AsyncStorage.getItem("username");
 
@@ -234,7 +237,7 @@ export default function HomeScreen() {
     setParticipants("");
     checkForEmptyTimesArray(setStatus);
   };
-
+  //delete events
   const handleDelete = async (id: number) => {
     try {
       const { data, error } = await supabase
