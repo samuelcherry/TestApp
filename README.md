@@ -14,7 +14,7 @@ Real-time updates using Supabase
 
 Clean, responsive UI with Material Design principles
 
-Tech Stack
+Tech Stack:
 React Native (Expo)
 
 Material UI (interface components)
