@@ -15,15 +15,16 @@ Real-time updates using Supabase
 Clean, responsive UI with Material Design principles
 
 Tech Stack:
-React Native (Expo)
 
-Material UI (interface components)
+    React Native (Expo)
 
-Supabase (backend and database)
+    Material UI (interface components)
 
-AsyncStorage (local device storage)
+    Supabase (backend and database)
 
-TypeScript for type safety
+    AsyncStorage (local device storage)
+
+    TypeScript for type safety
 
 Project Structure
 
